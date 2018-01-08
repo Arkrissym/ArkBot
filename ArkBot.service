@@ -1,0 +1,10 @@
+[Unit]
+Description=ArkBot
+After=systemd-networkd-wait-online.service
+
+[Service]
+Type=forking
+ExecStart=/home/pi/ArkBot/start.sh
+
+[Install]
+WantedBy=multi-user.target

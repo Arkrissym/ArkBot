@@ -1,4 +1,6 @@
 token.txt
+__pycache__
+faq.txt
 
 # Prerequisites
 *.d
