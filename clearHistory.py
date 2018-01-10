@@ -14,4 +14,3 @@ async def clearLog(client, message):
 			await client.delete_message(log)
 
 commands.update({'!clearlog' : clearLog})
-commandNames.append('!clearlog')

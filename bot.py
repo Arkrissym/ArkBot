@@ -4,6 +4,7 @@ import logging
 import logging.handlers
 
 from commandList import *
+import dataBase
 
 import testModule
 import uptime
@@ -17,7 +18,7 @@ client=discord.Client()
 async def listCommands(client, message):
 	easterEggs=0
 	string='Liste (fast) aller Befehle:\n'
-	for name in commandNames:
+	for name in commands.keys():
 		if name.startswith('!'):
 			string=string + name + '\n'
 		else:
@@ -26,7 +27,6 @@ async def listCommands(client, message):
 	await client.send_message(message.channel, string)
 
 commands.update({'!commands' : listCommands})
-commandNames.append('!commands')
 
 logger=logging.getLogger('ArkBot')
 logger.setLevel(logging.DEBUG)
@@ -58,10 +58,27 @@ async def on_message(message):
 	if message.author == client.user:
 		return
 
-	for cmd in commandNames:
-		if message.content.startswith(cmd):
+	for cmd in commands.keys():
+		if message.content == cmd:
+			logger.info(message.author.name + ' called: ' + cmd)
+			await commands[cmd](client, message)
+			n=dataBase.readVal(message.author.name, cmd)
+#			if n:
+			dataBase.writeVal(message.author.name, cmd, n+1)
+#			else:
+#				dataBase.writeVal(message.author.name, cmd, 1)
+			return
+
+	for cmd in commands.keys():
+		if message.content.startswith(cmd + ' '):
 			logger.info(message.author.name + ' called ' + cmd)
 			await commands[cmd](client, message)
+			n=dataBase.readVal(message.author.name, cmd)
+#			if n:
+			dataBase.writeVal(message.author.name, cmd, n+1)
+#			else:
+#				dataBase.writeVal(message.author.name, cmd, 1)
+			return
 
 #read the token from token.txt
 tokenFile=open("token.txt", "r")

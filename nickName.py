@@ -1,28 +1,25 @@
 from commandList import *
 import asyncio
 import random
+from faker import Faker
 
 nameList=[
 	'Noname',
-	'Deine Mudda',
 	'Alphakevin',
 	'Chantal',
-	'Winnetouch',
 	'Teemo',
-	'Jens Maul',
 	'Peter Müller, Klasse 2C',
 	'Count Schoko',
 	'Bob Ross',
 	'Donald Trump',
-	'Frauke Petry',
 	'Angela Merkel',
-	'Angelo Merke',
 	'Barack Obama',
 	'Zeuge Seehofas',
-	'Der Reichsbürger',
 	'Karsten Stahl',
 	'Hans Jörg'
 ]
+
+fake=Faker('de_DE')
 
 async def setYourMom(client, message):
 	oldName=message.author.nick
@@ -32,11 +29,11 @@ async def setYourMom(client, message):
 	await client.delete_message(message)
 
 async def setRandomNick(client, message):
-	await client.change_nickname(message.author, nameList[random.randint(0, len(nameList) - 1)])
+	if random.randint(0, 2) < 1:
+		await client.change_nickname(message.author, nameList[random.randint(0, len(nameList) - 1)])
+	else:
+		await client.change_nickname(message.author, fake.name())
 
 commands.update({'!yourmom' : setYourMom})
-commandNames.append('!yourmom')
 commands.update({'!randomnick' : setRandomNick})
-commandNames.append('!randomnick')
 commands.update({'!setnick' : setRandomNick})
-commandNames.append('!setnick')

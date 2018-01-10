@@ -52,6 +52,5 @@ async def uptime(client, message):
 	await client.send_message(message.channel, answer)
 
 commands.update({'!uptime' : uptime})
-commandNames.append('!uptime')
 
 startTime=time.time()

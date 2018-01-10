@@ -14,10 +14,6 @@ line=file.readline()
 while line != '':
 	line=line[:-1]
 	commands.update({line : faq})
-	commandNames.append(line)
-#	print(line)
 	file.readline()
-#	print(file.readline()[:-1])
-#	print('---')
 	line=file.readline()
 file.close()

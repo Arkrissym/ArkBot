@@ -12,4 +12,3 @@ async def test(client, message):
 
 item={'!test' : test}
 commands.update(item)
-commandNames.append('!test')
