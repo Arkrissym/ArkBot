@@ -62,9 +62,9 @@ async def on_message(message):
 		if message.content == cmd:
 			logger.info(message.author.name + ' called: ' + cmd)
 			await commands[cmd](client, message)
-			n=dataBase.readVal(message.author.name, cmd)
+			n=dataBase.readVal(message.author.name, message.channel, cmd)
 #			if n:
-			dataBase.writeVal(message.author.name, cmd, n+1)
+			dataBase.writeVal(message.author.name, message.channel, cmd, n+1)
 #			else:
 #				dataBase.writeVal(message.author.name, cmd, 1)
 			return
@@ -73,9 +73,9 @@ async def on_message(message):
 		if message.content.startswith(cmd + ' '):
 			logger.info(message.author.name + ' called ' + cmd)
 			await commands[cmd](client, message)
-			n=dataBase.readVal(message.author.name, cmd)
+			n=dataBase.readVal(message.author.name, message.channel, cmd)
 #			if n:
-			dataBase.writeVal(message.author.name, cmd, n+1)
+			dataBase.writeVal(message.author.name, message.channel, cmd, n+1)
 #			else:
 #				dataBase.writeVal(message.author.name, cmd, 1)
 			return

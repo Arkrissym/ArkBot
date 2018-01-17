@@ -1,7 +1,7 @@
 token.txt
 __pycache__
 faq.txt
-dataBase/*.json
+dataBase/*
 
 # Prerequisites
 *.d
