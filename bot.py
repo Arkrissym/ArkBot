@@ -1,84 +1,116 @@
 import discord
+from discord.ext import commands
 import asyncio
 import logging
-import logging.handlers
+#import logging.handlers
+import random
 
-from commandList import *
 import dataBase
 
-import testModule
-import uptime
-import zeit
-import faq
-import clearHistory
-import nickName
+bot=commands.Bot(command_prefix=commands.when_mentioned_or('!'))
+client=bot
 
-client=discord.Client()
+extensions=[
+	'testModule',
+	'lolStat',
+	'faq',
+	'nickName',
+	'uptime',
+	'zeit',
+	'clearHistory',
+	'music'
+]
 
-async def listCommands(client, message):
-	easterEggs=0
-	string='Liste (fast) aller Befehle:\n'
-	for name in commands.keys():
-		if name.startswith('!'):
-			string=string + name + '\n'
-		else:
-			easterEggs+=1
-	string=string + '\nEs gibt ' + str(easterEggs) + ' versteckte Befehle.'
-	await client.send_message(message.channel, string)
-
-commands.update({'!commands' : listCommands})
-
-logger=logging.getLogger('ArkBot')
+logger=logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 
-#fh=logging.FileHandler('ArkBot.log')
-fh=logging.handlers.RotatingFileHandler('/var/log/ArkBot.log', maxBytes=1024*1024, backupCount=3)
-fh.setLevel(logging.INFO)
-
 ch=logging.StreamHandler()
-ch.setLevel(logging.ERROR)
+ch.setLevel(logging.INFO)
 
-fh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-ch.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+ch.setFormatter(logging.Formatter('%(levelname)s - %(name)s - %(message)s'))
 
-logger.addHandler(fh)
 logger.addHandler(ch)
 
-@client.event
+@bot.event
 async def on_ready():
-	print('Logged in as')
-	print(client.user.name)
-#	print(client.user.id)
-	print('------')
-	logger.debug('Logged in as ' + client.user.name)
+	logger.info('Logged in as ' + client.user.name)
+	logger.info('discord.py version: ' + discord.__version__)
 
-@client.event
+@bot.event
 async def on_message(message):
 #	check, if message has been sent by this bot
-	if message.author == client.user:
+	if message.author == bot.user:
 		return
 
-	for cmd in commands.keys():
-		if message.content == cmd:
-			logger.info(message.author.name + ' called: ' + cmd)
-			await commands[cmd](client, message)
-			n=dataBase.readVal(message.author.name, message.channel, cmd)
-#			if n:
-			dataBase.writeVal(message.author.name, message.channel, cmd, n+1)
-#			else:
-#				dataBase.writeVal(message.author.name, cmd, 1)
-			return
+	if len(message.content) > 1:
+		cmd=bot.get_command(message.content[1:])
+		if cmd:
+			try:
+				logger.info('command ' + cmd.name + ' called.')
+				await bot.process_commands(message)
 
-	for cmd in commands.keys():
-		if message.content.startswith(cmd + ' '):
-			logger.info(message.author.name + ' called ' + cmd)
-			await commands[cmd](client, message)
-			n=dataBase.readVal(message.author.name, message.channel, cmd)
-#			if n:
-			dataBase.writeVal(message.author.name, message.channel, cmd, n+1)
-#			else:
-#				dataBase.writeVal(message.author.name, cmd, 1)
-			return
+				if hasattr(message.channel, 'server'):
+					prefix='messages/' + str(message.channel.server) + '/' + str(message.channel) + '/' + message.author.name
+				else:
+					prefix='messages/' + message.author.name
+
+				n=dataBase.readVal(prefix, cmd.name)
+				dataBase.writeVal(prefix, cmd.name, n+1)
+			except Exception as e:
+				logger.error('User ' + message.author.name + ' has sent ' + message.content + ' and caused exception: ' + str(e))
+
+@bot.event
+async def on_member_join(member):
+	Msg=[
+		['Willkommen ', '. Denk immer dran: nachts ist es kälter als draußen'],
+		['Willkommen ', '. Denk immer dran: Pommes schmecken besser als mit Ketchup.']
+	]
+	msg=random.randint(0, len(Msg) - 1)
+	ch=member.guild.system_channel
+	if not ch:
+		for ch in member.guild.text_channels:
+			break
+
+	await ch.send(Msg[msg][0] + member.name + Msg[msg][1])
+
+@bot.event
+async def on_member_remove(member):
+	Msg=[
+		[' ', ' ist abgedampft. OK Tschüüüüüüsss!'],
+		[' ', ' hat n Abgang gemacht.']
+	]
+	msg=random.randint(0, len(Msg) - 1)
+	ch=member.guild.system_channel
+	if not ch:
+		for ch in member.guild.text_channels:
+			break
+
+	await ch.send(Msg[msg][0] + member.name + Msg[msg][1])
+
+@bot.event
+async def on_member_ban(guild, user):
+	ch=guild.system_channel
+	if not ch:
+		for ch in guild.text_channels:
+			break
+
+	await ch.send(user.name + ' wurde gebannt.')
+
+@bot.event
+async def on_member_unban(guild, user):
+	ch=guild.system_channel
+	if not ch:
+		for ch in guild.text_channels:
+			break
+
+	await ch.send(user.name + ' wurde entbannt.')
+
+
+for ext in extensions:
+	try:
+		bot.load_extension(ext)
+	except Exception as e:
+		print('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
 
 #read the token from token.txt
 tokenFile=open("token.txt", "r")
@@ -88,4 +120,4 @@ tokenFile.close()
 #remove \n at the end of the line
 token=token[:-1]
 
-client.run(token)
+bot.run(token)

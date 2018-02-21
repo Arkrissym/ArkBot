@@ -5,6 +5,11 @@ After=systemd-networkd-wait-online.service
 [Service]
 Type=forking
 ExecStart=/home/pi/ArkBot/start.sh
+#WorkingDirectory=/home/pi/ArkBot
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=ArkBot
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

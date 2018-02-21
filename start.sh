@@ -2,4 +2,4 @@
 
 cd /home/pi/ArkBot
 
-./loop.sh &
+python3 bot.py &

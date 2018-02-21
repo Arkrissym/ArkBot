@@ -1,16 +1,30 @@
-from commandList import *
+from discord.ext import commands
+from datetime import datetime
+import time
+import asyncio
 
-async def clearLog(client, message):
-	if message.author.server_permissions.manage_messages == False:
-		print(message.author.name + " doesn't have permission to manage messages.")
-		msg="Sorry " + message.author.nick + ". Du hast zu wenig Rechte, um diesen Befehl zu nutzen."
-		await client.send_message(message.channel, msg)
-		return
+class ClearHistory:
+	def __init__(self, bot):
+		self.bot=bot
 
-	async for log in client.logs_from(message.channel, limit=1000):
-		if log.author == client.user:
-			await client.delete_message(log)
-		elif await isCommand(log):
-			await client.delete_message(log)
+	@commands.command(pass_context=True, no_pm=True)
+	@commands.has_permissions(manage_messages=True)
+	async def clearlog(self, ctx):
+		msgs=[]
+		async for log in ctx.message.channel.history(limit=None, after=datetime.utcfromtimestamp(time.time()-86400)):
+			if log.author == self.bot.user:
+				msgs.append(log)
+			elif len(log.content) > 1:
+				if self.bot.get_command(log.content[1:]):
+					msgs.append(log)
 
-commands.update({'!clearlog' : clearLog})
+		await ctx.message.channel.delete_messages(msgs)
+
+	@commands.command(pass_context=True, no_pm=True, description='tabularasa protocol')
+	@commands.has_permissions(administrator=True)
+	async def tabularasa(self, ctx):
+		async for log in ctx.message.channel.history(limit=None):
+			await log.delete()
+
+def setup(bot):
+	bot.add_cog(ClearHistory(bot))

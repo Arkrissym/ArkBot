@@ -2,13 +2,20 @@ import json
 import pathlib
 import os
 
-def readVal(user, channel, valName):
-	if hasattr(channel, 'server'):
-		server='/' + str(channel.server) + '/' + str(channel) + '/'
-	else:
-		server='/'
+def dump(prefix):
+	filename='dataBase/' + prefix + '.json'
+	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
-	filename='dataBase' + server + user + '.json'
+	try:
+		with open(filename, 'r') as file:
+			data=json.load(file)
+			return data
+	except:
+		return {}
+	return {}
+
+def readVal(prefix, valName):
+	filename='dataBase/' + prefix + '.json'
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
@@ -21,13 +28,8 @@ def readVal(user, channel, valName):
 		return 0
 	return 0
 
-def writeVal(user, channel, valName, val):
-	if hasattr(channel, 'server'):
-		server='/' + str(channel.server) + '/' + str(channel) + '/'
-	else:
-		server='/'
-
-	filename='dataBase' + server + user + '.json'
+def writeVal(prefix, valName, val):
+	filename='dataBase/' + prefix + '.json'
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
