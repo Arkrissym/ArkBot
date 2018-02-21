@@ -1,4 +1,0 @@
-Are there any bots on this server?
-Yes. I am a bot.
-!sleep
-No, I won't sleep.
