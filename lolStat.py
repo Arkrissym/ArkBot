@@ -9,7 +9,9 @@ class LeagueOfLegends:
 	def __init__(self, bot):
 		self.bot=bot
 		self.lastrun=time.time()
-		self.key='RGAPI-329eb39d-5235-4a5b-adfc-0d8d3a69209b'
+		keyFile=open("riotKey.txt", "r")
+		self.key=keyFile.readline()
+		keyFile.close()
 
 	def getDataByName(self, name, apiLink):
 #		global lastrun

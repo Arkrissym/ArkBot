@@ -27,19 +27,19 @@ class myFFmpegPCMAudio(discord.AudioSource):
 
 		args.extend(('-re', '-i'))
 		args.append(lsource)
-		args.extend(('-f', 's16le', '-ar', '48000', '-ac', '2', '-loglevel', 'warning', '-bufsize', '512000k'))
+		args.extend(('-f', 's16le', '-ar', '48000', '-ac', '2', '-loglevel', 'error', '-bufsize', '512000k'))
 
 		if isinstance(options, str):
 			args.extend(shlex.split(options))
 
 		#added a buffer (better for livestreams)
-		args.append('pipe:1 | mbuffer -q -m 2000k')
+		args.append('pipe:1')
 
 		args2=executable
 		args2=args2 + str(' -i ')
 		args2=args2 + str('-' if pipe else str('\"' + source + '\"'))
-		args2=args2 + str(' -threads 8 -loglevel warning -f wav -ar 48000 -ac 2 -vn')
-		args2=args2 + str(' pipe:1 | mbuffer -q -c -m 2000k > ' + lsource)
+		args2=args2 + str(' -threads 8 -loglevel error -f wav -ar 48000 -ac 2 -vn')
+		args2=args2 + str(' pipe:1 | mbuffer -Q -q -v 0 -c -m 2048k > ' + lsource)
 
 		self._process = None
 		self._process2=None
@@ -188,14 +188,14 @@ class Music:
 		if "entries" in info:
 			info=info['entries'][0]
 
-		if "is_live" in info and info['is_live']==True:
-			c=info['formats'][0]
-			for format in info['formats']:
-				if format['height'] < c['height']:
-					c=format
-			url=c['url']
-		else:
-			url=info['url']
+#		if "is_live" in info and info['is_live']==True:
+#			c=info['formats'][0]
+#			for format in info['formats']:
+#				if format['height'] < c['height']:
+#					c=format
+#			url=c['url']
+#		else:
+		url=info['url']
 
 		is_twitch='twitch' in url
 		if is_twitch:
