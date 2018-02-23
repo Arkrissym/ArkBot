@@ -12,6 +12,7 @@ client=bot
 
 extensions=[
 	'testModule',
+	'lolStat.py',
 	'faq',
 	'nickName',
 	'uptime',
