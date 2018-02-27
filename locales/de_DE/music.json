@@ -1,0 +1,11 @@
+{
+"join_channel" : "Bereits in einem Voicechannel...",
+"join_no_channel" : "Ungültiger Channel...",
+"join_success" : "Mit {} verbunden.",
+"queue_full" : "Die Warteschlange ist bereits voll.",
+"enqueued_song" : "{} wurde in die Warteschlange eingereiht.",
+"reenqueued_song" : "{} wurde nochmal in die Warteschlange eingereiht.",
+"playytlist_warning" : "Suche nach einer Playlist. Das kann sehr lang dauern!",
+"playytlist_enqueue" : "Playlist {} wird in die Warteschlange eingereiht",
+"playytlist_no_playlist" : "Das scheint keine Playlist zu sein."
+}

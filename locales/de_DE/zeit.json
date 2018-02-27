@@ -1,0 +1,14 @@
+{
+"time_answers" : [
+	"Der Zeiger liegt in der Kurve.",
+	"Es ist kurz vor knapp.",
+	"Nur noch ein Tag, dann ist morgen.",
+	"Zu spät..."
+	],
+"time_triggers" : [
+	"Wie spät ist es?"
+	],
+"time_aliases" : [
+	"zeit"
+	]
+}

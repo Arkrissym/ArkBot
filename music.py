@@ -1,13 +1,14 @@
 from discord.ext import commands
 import discord
+
 import youtube_dl
 import asyncio
-
 import time
 import os
-
 import subprocess
 import shlex
+
+import config
 
 if not discord.opus.is_loaded():
 	discord.opus.load_opus('opus')
@@ -38,7 +39,7 @@ class myFFmpegPCMAudio(discord.AudioSource):
 		args2=executable
 		args2=args2 + str(' -i ')
 		args2=args2 + str('-' if pipe else str('\"' + source + '\"'))
-		args2=args2 + str(' -threads 8 -loglevel error -f wav -ar 48000 -ac 2 -vn')
+		args2=args2 + str(' -loglevel error -f wav -ar 48000 -ac 2 -vn')
 		args2=args2 + str(' pipe:1 | mbuffer -Q -q -v 0 -c -m 2048k > ' + lsource)
 
 		self._process = None
@@ -104,8 +105,10 @@ class VoiceState:
 	def __init__(self, bot):
 		self.bot=bot
 		self.current_song=None
+		self.previous_song=None
 		self.voice_client=None
-		self.songs=asyncio.Queue(maxsize=10)
+		self.voice_channel=None
+		self.songs=asyncio.Queue(maxsize=1000)
 		self.play_next_song=asyncio.Event()
 		self.audio_player=self.bot.loop.create_task(self.audio_player_task())
 
@@ -116,6 +119,7 @@ class VoiceState:
 		while self.songs.empty() == False:
 			await self.songs.get()
 		await self.voice_client.disconnect()
+		self.voice_channel=None
 
 	def pause(self):
 		self.voice_client.pause()
@@ -124,6 +128,7 @@ class VoiceState:
 		self.voice_client.resume()
 
 	def play_next(self, error):
+		self.previous_song=self.current_song
 		self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
 	async def audio_player_task(self):
@@ -131,6 +136,12 @@ class VoiceState:
 			self.play_next_song.clear()
 			self.current_song=await self.songs.get()
 #			await self.current_song.channel.send('Now playing ' + self.current_song.name + ', requested by: ' + self.current_song.requester.display_name)
+			wait=True
+			while wait:
+				if self.voice_client is not None:
+					if self.voice_client.is_connected():
+						wait=False
+				await asyncio.sleep(1.0)
 			self.voice_client.play(discord.PCMVolumeTransformer(myFFmpegPCMAudio(self.current_song.url), volume=0.01), after=self.play_next)
 			await self.play_next_song.wait()
 
@@ -152,49 +163,34 @@ class Music:
 		state=self.get_voice_state(ctx.message.guild)
 		try:
 			state.voice_client=await channel.connect()
+			state.voice_channel=channel
 		except discord.ClientException:
-			await ctx.send('Already in a voice channel...')
+			await ctx.send(config.strings['music']['join_channel'])
 		except discord.InvalidArgument:
-			await ctx.send('This is not a voice channel...')
+			await ctx.send(config.strings['music']['join_no_channel'])
 		else:
-			await ctx.send('Ready to play audio in ' + channel.name)
-
-	@commands.command(pass_context=True, no_pm=True)
-	async def playlist(self, ctx, *song_names : str):
-		for name in song_names:
-			await self.play(ctx, name)
-
-	@commands.command(pass_context=True, no_pm=True)
-	async def playsong(self, ctx, *, song_name : str):
-		await self.play(ctx, song_name)
+			await ctx.send(config.strings['music']['join_success'].format(channel.name))
 
 	async def play(self, ctx, song_name):
 		voice_state=self.get_voice_state(ctx.message.guild)
 
 		if voice_state.songs.full():
-			await ctx.send('Die Warteschlange ist bereits voll.')
+			await ctx.send(config.strings['music']['queue_full'])
 			return
 
 		ytdl_opts={
 			'format': 'webm[abr>0]/bestaudio/best',
 			'prefer_ffmpeg': True,
-			'default_search': 'auto',
+			'default_search': 'ytsearch',
 			'noplaylist': True,
 			'quiet': True
 		}
 
 		ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-		info=ytdl.extract_info(song_name, download=False)
+		info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, song_name, False)
 		if "entries" in info:
 			info=info['entries'][0]
 
-#		if "is_live" in info and info['is_live']==True:
-#			c=info['formats'][0]
-#			for format in info['formats']:
-#				if format['height'] < c['height']:
-#					c=format
-#			url=c['url']
-#		else:
 		url=info['url']
 
 		is_twitch='twitch' in url
@@ -205,7 +201,57 @@ class Music:
 
 		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url)
 		await voice_state.songs.put(entry)
-		await ctx.send(song_name + ' in Warteschlange eingereiht.')
+		await ctx.send(config.strings['music']['enqueued_song'].format(song_name))
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def playlist(self, ctx, *song_names : str):
+		for name in song_names:
+			await self.play(ctx, name)
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def playsong(self, ctx, *, song_name : str):
+		await self.play(ctx, song_name)
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def playytlist(self, ctx, *, playlist_link : str):
+		voice_state=self.get_voice_state(ctx.message.guild)
+
+		if voice_state.songs.full():
+			await ctx.send(config.strings['music']['queue_full'])
+			return
+
+		ytdl_opts={
+			'format': 'webm[abr>0]/bestaudio/best',
+			'prefer_ffmpeg': True,
+			'default_search': 'ytsearch',
+			'yesplaylist': True,
+			'quiet': True
+		}
+
+		await ctx.send(config.strings['music']['playytlist_warning'])
+
+		ytdl=youtube_dl.YoutubeDL(ytdl_opts)
+		info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, playlist_link, False)
+
+		if (info['_type'] == 'playlist') and ('title' in info):
+			await ctx.send(config.strings['music']['playytlist_enqueue'].format(info['title']))
+			for entry in list(info['entries']):
+				url=entry['url']
+
+				is_twitch='twitch' in url
+				if is_twitch:
+					song_name=entry['description']
+				else:
+					song_name=entry['title']
+
+				if voice_state.songs.full():
+					print(config.strings['music']['queue_full'])
+					return
+
+				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url)
+				await voice_state.songs.put(song_entry)
+		else:
+			await ctx.send(config.strings['music']['playytlist_no_playlist'])
 
 	@commands.command(pass_context=True, no_pm=True)
 #	@commands.has_permissions(administrator=True)
@@ -231,6 +277,15 @@ class Music:
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client:
 			state.resume()
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def repeat(self, ctx):
+		voice_state=self.get_voice_state(ctx.message.guild)
+
+		previous=voice_state.previous_song
+		if previous is not None:
+			await voice_state.songs.put(previous)
+			await ctx.send(config.strings['music']['reenqueued_song'].format(previous.name))
 
 def setup(bot):
 	bot.add_cog(Music(bot))

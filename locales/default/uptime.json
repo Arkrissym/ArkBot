@@ -1,0 +1,11 @@
+{
+"uptime_answer" : "Running non-stop for ",
+"day" : " day",
+"days" : " days",
+"hour" : " hour",
+"hours" : " hours",
+"min" : " minute",
+"mins" : " minutes",
+"sec" : " second",
+"secs" : " seconds"
+}

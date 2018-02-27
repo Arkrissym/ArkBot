@@ -1,0 +1,12 @@
+{
+"member_join_msg" : [
+	"Willkommen {}. Denk immer dran: nachts ist es kälter als draußen",
+	"Willkommen {}. Denk immer dran: Pommes schmecken besser als mit Ketchup."
+	],
+"member_remove_msg" : [
+	"{} ist abgedampft. OK Tschüüüüüüsss!",
+	"{} hat n Abgang gemacht."
+	],
+"member_ban_msg" : "{} wurde gebannt.",
+"member_unban_msg" : "{} wurde entbannt."
+}

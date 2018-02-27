@@ -1,0 +1,12 @@
+{
+"time_answers" : [
+	"I don't know.",
+	"*insert joke here*",
+	],
+"time_triggers" : [
+	"What time is it?"
+	]
+"time_aliases" : [
+	"zeit"
+	]
+}

@@ -5,21 +5,11 @@ import logging
 #import logging.handlers
 import random
 
+import config
 import dataBase
 
-bot=commands.Bot(command_prefix=commands.when_mentioned_or('!'))
+bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
 client=bot
-
-extensions=[
-	'testModule',
-	'lolStat.py',
-	'faq',
-	'nickName',
-	'uptime',
-	'zeit',
-	'clearHistory',
-	'music'
-]
 
 logger=logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -35,6 +25,10 @@ logger.addHandler(ch)
 async def on_ready():
 	logger.info('Logged in as ' + client.user.name)
 	logger.info('discord.py version: ' + discord.__version__)
+
+@bot.event
+async def on_disconnect():
+	bot.connect()
 
 @bot.event
 async def on_message(message):
@@ -61,31 +55,33 @@ async def on_message(message):
 
 @bot.event
 async def on_member_join(member):
-	Msg=[
-		['Willkommen ', '. Denk immer dran: nachts ist es kälter als draußen'],
-		['Willkommen ', '. Denk immer dran: Pommes schmecken besser als mit Ketchup.']
-	]
+#	Msg=[
+#		['Willkommen ', '. Denk immer dran: nachts ist es kälter als draußen'],
+#		['Willkommen ', '. Denk immer dran: Pommes schmecken besser als mit Ketchup.']
+#	]
+	Msg=config.strings['bot']['member_join_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
 	if not ch:
 		for ch in member.guild.text_channels:
 			break
 
-	await ch.send(Msg[msg][0] + member.name + Msg[msg][1])
+	await ch.send(Msg[msg].format(member.name))
 
 @bot.event
 async def on_member_remove(member):
-	Msg=[
-		[' ', ' ist abgedampft. OK Tschüüüüüüsss!'],
-		[' ', ' hat n Abgang gemacht.']
-	]
+#	Msg=[
+#		[' ', ' ist abgedampft. OK Tschüüüüüüsss!'],
+#		[' ', ' hat n Abgang gemacht.']
+#	]
+	Msg=config.strings['bot']['member_remove_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
 	if not ch:
 		for ch in member.guild.text_channels:
 			break
 
-	await ch.send(Msg[msg][0] + member.name + Msg[msg][1])
+	await ch.send(Msg[msg].format(member.name))
 
 @bot.event
 async def on_member_ban(guild, user):
@@ -94,7 +90,7 @@ async def on_member_ban(guild, user):
 		for ch in guild.text_channels:
 			break
 
-	await ch.send(user.name + ' wurde gebannt.')
+	await ch.send(config.strings['bot']['member_ban_msg'].format(user.name))
 
 @bot.event
 async def on_member_unban(guild, user):
@@ -103,14 +99,14 @@ async def on_member_unban(guild, user):
 		for ch in guild.text_channels:
 			break
 
-	await ch.send(user.name + ' wurde entbannt.')
+	await ch.send(config.strings['bot']['member_unban_msg'].format(user.name))
 
 
-for ext in extensions:
+for ext in config.config['bot']['extensions'].split():
 	try:
 		bot.load_extension(ext)
 	except Exception as e:
-		print('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
+		logger.error('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
 
 #read the token from token.txt
 tokenFile=open("token.txt", "r")

@@ -1,0 +1,11 @@
+{
+"join_channel" : "Already in a voice channel...",
+"join_no_channel" : "This is not a voice channel...",
+"join_success" : "Ready to play audio in {}",
+"queue_full" : "Queue is already full.",
+"enqueued_song" : "Enqueued {}.",
+"reenqueued_song" : "Reenqueued {}.",
+"playytlist_warning" : "Searching for a playlist. This might take a long time!",
+"playytlist_enqueue" : "Enqueuing playlist {}",
+"playytlist_no_playlist" : "That's not a playlist."
+}

@@ -1,5 +1,6 @@
 from discord.ext import commands
 import time
+import config
 
 class Uptime:
 	def __init__(self, bot):
@@ -20,9 +21,9 @@ class Uptime:
 			days=int(days)
 			uptime-=days * 86400
 			if days == 1:
-				answer=answer + str(days) + ' Tag'
+				answer=answer + str(days) + config.strings['uptime']['day']
 			else:
-				answer=answer + str(days) + ' Tage'
+				answer=answer + str(days) + config.strings['uptime']['days']
 		if uptime > 3600:
 			hours=uptime / 3600
 			hours=int(hours)
@@ -30,9 +31,9 @@ class Uptime:
 			if days > 0:
 				answer=answer + ', '
 			if hours == 1:
-				answer=answer + str(hours) + ' Stunde'
+				answer=answer + str(hours) + config.strings['uptime']['hour']
 			else:
-				answer=answer + str(hours) + ' Stunden'
+				answer=answer + str(hours) + config.strings['uptime']['hours']
 		if uptime > 60:
 			mins=uptime / 60
 			mins=int(mins)
@@ -40,17 +41,17 @@ class Uptime:
 			if days > 0 or hours > 0:
 				answer=answer + ', '
 			if mins == 1:
-				answer=answer + str(mins) + ' Minute'
+				answer=answer + str(mins) + config.strings['uptime']['min']
 			else:
-				answer=answer + str(mins) + ' Minuten'
+				answer=answer + str(mins) + config.strings['uptime']['mins']
 
 		if (days > 0 or hours > 0 or mins > 0) and (uptime > 0):
 			answer=answer + ', '
 		uptime=int(uptime)
 		if uptime == 1:
-			answer=answer + str(uptime) + ' Sekunde'
+			answer=answer + str(uptime) + config.strings['uptime']['sec']
 		elif uptime > 1:
-			answer=answer + str(uptime) + ' Sekunden'
+			answer=answer + str(uptime) + config.strings['uptime']['secs']
 
 		answer=answer + '.'
 

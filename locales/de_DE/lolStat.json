@@ -1,0 +1,5 @@
+{
+"lstatlevel_description" : "Zeigt das Level in League of Legends an.",
+"lstatlevel_msg" : "Spieler {0} ist Level {1}.",
+"lstatlevel_fail" : "Ein Fehler ist der Abfrage aufgetreten."
+}

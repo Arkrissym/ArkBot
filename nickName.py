@@ -3,6 +3,7 @@ import discord
 import asyncio
 import random
 from faker import Faker
+import config
 
 class Nickname:
 	def __init__(self, bot):
@@ -23,7 +24,7 @@ class Nickname:
 			'Hans Jörg'
 		]
 
-		self.fake=Faker('de_DE')
+		self.fake=Faker(config.config['nickName']['Faker_locale'])
 
 	@commands.command(hidden=True, no_pm=True)
 	async def yourmom(self, ctx):
@@ -46,7 +47,8 @@ class Nickname:
 		if newNick:
 			await ctx.author.edit(nick=newNick)
 		else:
-			await ctx.author.edit(nick='Ostfriese des Monats')
+#			await ctx.author.edit(nick='Ostfriese des Monats')
+			await ctx.author.edit(nick=config.strings['nickName']['idiot'])
 
 def setup(bot):
 	bot.add_cog(Nickname(bot))
