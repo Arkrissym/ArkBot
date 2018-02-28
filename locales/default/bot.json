@@ -1,9 +1,9 @@
 {
 "member_join_msg" : [
-	"Welcome on this server {}.",
+	"Welcome on this server {}."
         ],
 "member_remove_msg" : [
-	"{} left the server",
+	"{} left the server"
 	],
 "member_ban_msg" : "{} is now banned from this server.",
 "member_unban_msg" : "{} has been unbanned."

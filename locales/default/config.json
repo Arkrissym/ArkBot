@@ -1,0 +1,5 @@
+{
+"list_of_locales" : "List of available locales",
+"set_locale" : "Set locale to {}",
+"locale_not_found" : "Locale '{}' not found"
+}

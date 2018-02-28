@@ -23,22 +23,37 @@
 import json
 from configparser import ConfigParser, ExtendedInterpolation
 import os
+import discord
+from discord.ext import commands
+from logger import logger as log
 
 config={}
 strings={}
 _initialized=False
+
+def load_locales(locale):
+	try:
+		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
+			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
+				try:
+					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r') as str_file:
+						data=json.load(str_file)
+						for key in data.keys():
+							strings[file[:-5]][key]=data[key]
+				except Exception as e:
+					log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
+	except Exception as e:
+		log.error('failed to load translation: {}'.format(str(e)))
+
 
 if _initialized == False:
 	try:
 		config=ConfigParser(interpolation=ExtendedInterpolation())
 		config.read('config.cfg')
 	except Exception as e:
-		print('failed to load config: ' + str(e))
+		log.error('failed to load config: ' + str(e))
 
-	if 'locale' in config['bot']:
-		locale=config['bot']['locale']
-	else:
-		locale='default'
+	locale='default'
 
 	try:
 		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
@@ -46,9 +61,53 @@ if _initialized == False:
 				try:
 					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r') as str_file:
 						strings[file[:-5]]=json.load(str_file)
-				except:
-					print('failed to open {}'.format(file))
-	except:
-		print('failed to load strings')
+				except Exception as e:
+					log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
+	except Exception as e:
+		log.error('failed to load default strings: {}'.format(str(e)))
+
+	if 'bot' in config:
+		if 'locale' in config['bot']:
+			locale=config['bot']['locale']
+			if locale != 'default':
+				load_locales(locale)
 
 	_initialized=True
+
+class Config:
+	def __init__(self, bot):
+		from discord.ext import commands
+		self.bot=bot
+
+	@commands.command(pass_context=True)
+	@commands.is_owner()
+	async def list_locales(self, ctx):
+		text=str()
+		for locale in os.listdir('{}/locales/'.format(os.path.dirname(__file__))):
+			text='{}\n{}'.format(text, locale)
+
+		embed=discord.Embed(title=strings['config']['list_of_locales'], description=text)
+
+		await ctx.send(embed=embed)
+
+	@commands.command(pass_context=True)
+	@commands.is_owner()
+	async def set_locale(self, ctx, *, locale : str):
+		locale_avail=False
+
+		for l in os.listdir('{}/locales/'.format(os.path.dirname(__file__))):
+			if locale == l:
+				locale_avail=True
+
+		if locale_avail:
+			load_locales(locale)
+			if 'bot' in config:
+				config['bot']['locale']=locale
+
+			await ctx.send(strings['config']['set_locale'].format(locale))
+		else:
+			await ctx.send(strings['config']['locale_not_found'].format(locale))
+
+def setup(bot):
+	bot.add_cog(Config(bot))
+

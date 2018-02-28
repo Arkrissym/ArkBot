@@ -122,7 +122,6 @@ class VoiceEntry:
 		self.channel=channel
 		self.name=song_name
 		self.url=url
-#		self.audio_source=discord.FFmpegPCMAudio(url)
 
 class VoiceState:
 	def __init__(self, bot):
@@ -143,6 +142,7 @@ class VoiceState:
 			await self.songs.get()
 		await self.voice_client.disconnect()
 		self.voice_channel=None
+		self.current_song=None
 
 	def pause(self):
 		self.voice_client.pause()

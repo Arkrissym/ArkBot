@@ -1,0 +1,5 @@
+{
+"list_of_locales" : "Liste aller verfügbarer Sprachen",
+"set_locale" : "Sprache '{}' eingestellt",
+"locale_not_found" : "Sprache '{}' nicht gefunden"
+}

@@ -10,5 +10,5 @@
 "playytlist_enqueue" : "Playlist {} wird in die Warteschlange eingereiht",
 "playytlist_no_playlist" : "Das scheint keine Playlist zu sein.",
 "nowplaying_song" : "Jetzt läuft: {}.",
-"nowplaying_nothing" : "Jetz läuft nichts."
+"nowplaying_nothing" : "Jetzt läuft nichts."
 }
