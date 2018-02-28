@@ -20,35 +20,15 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-import json
-from configparser import ConfigParser, ExtendedInterpolation
-import os
+#import discord
+import logging
 
-config={}
-strings={}
-_initialized=False
+logger=logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
 
-if _initialized == False:
-	try:
-		config=ConfigParser(interpolation=ExtendedInterpolation())
-		config.read('config.cfg')
-	except Exception as e:
-		print('failed to load config: ' + str(e))
+ch=logging.StreamHandler()
+ch.setLevel(logging.INFO)
 
-	if 'locale' in config['bot']:
-		locale=config['bot']['locale']
-	else:
-		locale='default'
+ch.setFormatter(logging.Formatter('%(levelname)s - %(name)s - %(message)s'))
 
-	try:
-		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
-			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
-				try:
-					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r') as str_file:
-						strings[file[:-5]]=json.load(str_file)
-				except:
-					print('failed to open {}'.format(file))
-	except:
-		print('failed to load strings')
-
-	_initialized=True
+logger.addHandler(ch)

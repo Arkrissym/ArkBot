@@ -23,30 +23,19 @@
 import discord
 from discord.ext import commands
 import asyncio
-import logging
-#import logging.handlers
 import random
 
+from logger import logger
 import config
 import dataBase
 
 bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
-client=bot
-
-logger=logging.getLogger('discord')
-logger.setLevel(logging.DEBUG)
-
-ch=logging.StreamHandler()
-ch.setLevel(logging.INFO)
-
-ch.setFormatter(logging.Formatter('%(levelname)s - %(name)s - %(message)s'))
-
-logger.addHandler(ch)
 
 @bot.event
 async def on_ready():
-	logger.info('Logged in as ' + client.user.name)
+	logger.info('Logged in as ' + bot.user.name)
 	logger.info('discord.py version: ' + discord.__version__)
+	await bot.change_presence(status=discord.Status.online, game=discord.Game(name='github.com/Arkrissym/ArkBot'), afk=False)
 
 @bot.event
 async def on_disconnect():

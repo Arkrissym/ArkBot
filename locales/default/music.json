@@ -5,7 +5,10 @@
 "queue_full" : "Queue is already full.",
 "enqueued_song" : "Enqueued {}.",
 "reenqueued_song" : "Reenqueued {}.",
+"playytlist_description" : "Play <playlist_link>. <mode> can be 'normal', 'reverse' or 'random'.",
 "playytlist_warning" : "Searching for a playlist. This might take a long time!",
 "playytlist_enqueue" : "Enqueuing playlist {}",
-"playytlist_no_playlist" : "That's not a playlist."
+"playytlist_no_playlist" : "That's not a playlist.",
+"nowplaying_song" : "Now playing {}.",
+"nowplaying_nothing" : "Currently playing nothing."
 }

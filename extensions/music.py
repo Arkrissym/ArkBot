@@ -31,6 +31,7 @@ import subprocess
 import shlex
 
 import config
+from logger import logger as log
 
 if not discord.opus.is_loaded():
 	discord.opus.load_opus('opus')
@@ -91,26 +92,26 @@ class myFFmpegPCMAudio(discord.AudioSource):
 		proc = self._process2
 		if proc is not None:
 			proc.kill()
-			print('Preparing to terminate ffmpeg process %s.', proc.pid)
+			log.debug('Preparing to terminate ffmpeg process %s.', proc.pid)
 			proc.kill()
 			if proc.poll() is None:
-				print('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
+				log.info('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
 				proc.communicate()
-				print('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
+				log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
 			else:
-				print('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
+				log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
 		self._process2=None
 
 		proc = self._process
 		if proc is not None:
-			print('Preparing to terminate ffmpeg process %s.', proc.pid)
+			log.debug('Preparing to terminate ffmpeg process %s.', proc.pid)
 			proc.kill()
 			if proc.poll() is None:
-				print('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
+				log.info('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
 				proc.communicate()
-				print('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
+				log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
 			else:
-				print('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
+				log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
 		self._process = None
 
 		os.system('rm -f ' + self.fifo_file)
@@ -164,7 +165,7 @@ class VoiceState:
 					if self.voice_client.is_connected():
 						wait=False
 				await asyncio.sleep(1.0)
-			self.voice_client.play(discord.PCMVolumeTransformer(myFFmpegPCMAudio(self.current_song.url), volume=0.01), after=self.play_next)
+			self.voice_client.play(discord.PCMVolumeTransformer(myFFmpegPCMAudio(self.current_song.url), volume=0.1), after=self.play_next)
 			await self.play_next_song.wait()
 
 class Music:
@@ -205,7 +206,9 @@ class Music:
 			'prefer_ffmpeg': True,
 			'default_search': 'ytsearch',
 			'noplaylist': True,
-			'quiet': True
+			'quiet': True,
+			'ignoreerrors' : True,
+			'logger': log
 		}
 
 		ytdl=youtube_dl.YoutubeDL(ytdl_opts)
@@ -234,20 +237,34 @@ class Music:
 	async def playsong(self, ctx, *, song_name : str):
 		await self.play(ctx, song_name)
 
-	@commands.command(pass_context=True, no_pm=True)
-	async def playytlist(self, ctx, *, playlist_link : str):
+	@commands.command(pass_context=True, no_pm=True, description=config.strings['music']['playytlist_description'])
+	async def playytlist(self, ctx, mode : str, *, playlist_link : str):
 		voice_state=self.get_voice_state(ctx.message.guild)
 
 		if voice_state.songs.full():
 			await ctx.send(config.strings['music']['queue_full'])
 			return
 
+		if mode == 'random':
+			random=True
+			reverse=False
+		elif mode == 'reverse':
+			random=False
+			reverse=True
+		else:
+			random=False
+			reverse=False
+
 		ytdl_opts={
 			'format': 'webm[abr>0]/bestaudio/best',
 			'prefer_ffmpeg': True,
 			'default_search': 'ytsearch',
 			'yesplaylist': True,
-			'quiet': True
+			'quiet': True,
+			'playlistrandom' : random,
+			'playlistreverse' : reverse,
+			'ignoreerrors' : True,
+			'logger' : log
 		}
 
 		await ctx.send(config.strings['music']['playytlist_warning'])
@@ -258,7 +275,11 @@ class Music:
 		if (info['_type'] == 'playlist') and ('title' in info):
 			await ctx.send(config.strings['music']['playytlist_enqueue'].format(info['title']))
 			for entry in list(info['entries']):
-				url=entry['url']
+				try:
+					url=entry['url']
+				except:
+					log.debug('playytlist: skipping unavailable song')
+					continue
 
 				is_twitch='twitch' in url
 				if is_twitch:
@@ -267,7 +288,7 @@ class Music:
 					song_name=entry['title']
 
 				if voice_state.songs.full():
-					print(config.strings['music']['queue_full'])
+					await ctx.send(config.strings['music']['queue_full'])
 					return
 
 				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url)
@@ -299,6 +320,15 @@ class Music:
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client:
 			state.resume()
+
+	@commands.command(pass_context=True, no_pm=True, aliases=['np', 'current'])
+	async def nowplaying(self, ctx):
+		voice_state=self.get_voice_state(ctx.message.guild)
+
+		if voice_state.current_song == None:
+			await ctx.send(config.strings['music']['nowplaying_nothing'])
+		else:
+			await ctx.send(config.strings['music']['nowplaying_song'].format(voice_state.current_song.name))
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def repeat(self, ctx):
