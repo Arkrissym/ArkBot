@@ -303,12 +303,12 @@ class Music:
 					await ctx.send(config.strings['music']['queue_full'])
 					return
 
-				if 'thumbnail' in info:
+				if 'thumbnail' in entry:
 					thumbnail_url=entry['thumbnail']
 				else:
 					thumbnail_url=None
 
-				if 'uploader' in info:
+				if 'uploader' in entry:
 					uploader=entry['uploader']
 				else:
 					uploader=None
