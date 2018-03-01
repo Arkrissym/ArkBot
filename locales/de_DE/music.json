@@ -4,6 +4,7 @@
 "join_success" : "Mit {} verbunden.",
 "queue_full" : "Die Warteschlange ist voll.",
 "enqueued_song" : "{} wurde in die Warteschlange eingereiht.",
+"enqueued_songs" : "Liste wurde in die Warteschlange eingereiht.",
 "reenqueued_song" : "{} wurde nochmal in die Warteschlange eingereiht.",
 "playytlist_description" : "Spiele <playlist_link> ab. <mode> kann 'normal', 'reverse' oder 'random' sein.",
 "playytlist_warning" : "Suche nach einer Playlist. Das kann sehr lang dauern!",

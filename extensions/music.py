@@ -238,16 +238,34 @@ class Music:
 
 		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
 		await voice_state.songs.put(entry)
-		await ctx.send(config.strings['music']['enqueued_song'].format(song_name))
+
+		return entry
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def playlist(self, ctx, *song_names : str):
+		embed=discord.Embed(title=config.strings['music']['enqueued_songs'])
+		i=0
 		for name in song_names:
-			await self.play(ctx, name)
+			tmp=await self.play(ctx, name)
+			if i < 10:
+				embed.add_field(name=tmp.name, value='{} {}'.format(config.strings['music']['nowplaying_uploader'], tmp.uploader), inline=False)
+
+			i=i+1
+
+		if i > 10:
+			embed.set_footer(text=config.strings['music']['queue_elements_not_shown'].format(i - 10))
+
+		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def playsong(self, ctx, *, song_name : str):
-		await self.play(ctx, song_name)
+		tmp=await self.play(ctx, song_name)
+
+		embed=discord.Embed(title=config.strings['music']['enqueued_song'].format(tmp.name), description='{} {}'.format(config.strings['music']['nowplaying_uploader'], tmp.uploader))
+		if tmp.thumbnail_url != None:
+			embed.set_thumbnail(url=tmp.thumbnail_url)
+
+		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True, description=config.strings['music']['playytlist_description'])
 	async def playytlist(self, ctx, mode : str, *, playlist_link : str):
@@ -285,7 +303,13 @@ class Music:
 		info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, playlist_link, False)
 
 		if (info['_type'] == 'playlist') and ('title' in info):
-			await ctx.send(config.strings['music']['playytlist_enqueue'].format(info['title']))
+			embed=discord.Embed(title=config.strings['music']['playytlist_enqueue'].format(info['title']), description=config.strings['music']['nowplaying_uploader'].format(info['uploader']))
+
+			if 'thumbnail' in info:
+				embed.set_thumbnail(url=info['thumbnail'])
+
+			await ctx.send(embed=embed)
+
 			for entry in list(info['entries']):
 				try:
 					url=entry['url']
@@ -366,7 +390,12 @@ class Music:
 		previous=voice_state.previous_song
 		if previous is not None:
 			await voice_state.songs.put(previous)
-			await ctx.send(config.strings['music']['reenqueued_song'].format(previous.name))
+
+			embed=discord.Embed(title=config.strings['music']['reenqueued_song'].format(previous.name), description='{} {}'.format(config.strings['music']['nowplaying_uploader'], previous.uploader))
+			if previous.thumbnail_url != None:
+				embed.set_thumbnail(url=previous.thumbnail_url)
+
+			await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def queue(self, ctx):

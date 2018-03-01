@@ -4,6 +4,7 @@
 "join_success" : "Ready to play audio in {}",
 "queue_full" : "Queue is already full.",
 "enqueued_song" : "Enqueued {}.",
+"enqueued_songs" : "Enqueued list.",
 "reenqueued_song" : "Reenqueued {}.",
 "playytlist_description" : "Play <playlist_link>. <mode> can be 'normal', 'reverse' or 'random'.",
 "playytlist_warning" : "Searching for a playlist. This might take a long time!",
