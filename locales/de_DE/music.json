@@ -9,6 +9,12 @@
 "playytlist_warning" : "Suche nach einer Playlist. Das kann sehr lang dauern!",
 "playytlist_enqueue" : "Playlist {} wird in die Warteschlange eingereiht",
 "playytlist_no_playlist" : "Das scheint keine Playlist zu sein.",
-"nowplaying_song" : "Jetzt läuft: {}.",
-"nowplaying_nothing" : "Jetzt läuft nichts."
+"nowplaying_song" : "Jetzt läuft:",
+"nowplaying_nothing" : "Jetzt läuft nichts.",
+"nowplaying_title" : "Titel:",
+"nowplaying_uploader" : "Hochgeladen von:",
+"nowplaying_requester" : "Angefragt von:",
+"queue_title" : "Aktuelle Warteschlange für diesen Server",
+"queue_empty" : "Die Warteschlange ist leer.",
+"queue_elements_not_shown" : "{} Elemente werden ausgeblendet."
 }

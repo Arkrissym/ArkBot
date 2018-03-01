@@ -48,7 +48,7 @@ class Nickname:
 
 		self.fake=Faker(config.config['nickName']['Faker_locale'])
 
-	@commands.command(hidden=True, no_pm=True)
+	@commands.command(pass_context=True, hidden=True, no_pm=True)
 	async def yourmom(self, ctx):
 		oldName=ctx.author.nick
 		await ctx.author.edit(nick='Deine Mudda')
@@ -56,21 +56,24 @@ class Nickname:
 		await ctx.author.edit(nick=oldName)
 		await ctx.message.delete()
 
-	@commands.command(no_pm=True)
+	@commands.command(pass_context=True, no_pm=True)
 	async def randomnick(self, ctx):
 		if random.randint(0, 2) < 1:
 			await ctx.author.edit(nick=self.nameList[random.randint(0, len(nameList) - 1)])
 		else:
 			await ctx.author.edit(nick=self.fake.name())
 
-	@commands.command(no_pm=True)
+	@commands.command(pass_context=True, no_pm=True)
 #	@commands.has_permissions(change_nickname=True)
 	async def setnick(self, ctx, newNick : str):
 		if newNick:
 			await ctx.author.edit(nick=newNick)
 		else:
-#			await ctx.author.edit(nick='Ostfriese des Monats')
 			await ctx.author.edit(nick=config.strings['nickName']['idiot'])
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def idiot(self, ctx):
+		await ctx.author.edit(nick=config.strings['nickName']['idiot'])
 
 def setup(bot):
 	bot.add_cog(Nickname(bot))

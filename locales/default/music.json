@@ -9,6 +9,12 @@
 "playytlist_warning" : "Searching for a playlist. This might take a long time!",
 "playytlist_enqueue" : "Enqueuing playlist {}",
 "playytlist_no_playlist" : "That's not a playlist.",
-"nowplaying_song" : "Now playing {}.",
-"nowplaying_nothing" : "Currently playing nothing."
+"nowplaying_song" : "Now playing:",
+"nowplaying_nothing" : "Currently playing nothing.",
+"nowplaying_title" : "Title:",
+"nowplaying_uploader" : "Uploaded by:",
+"nowplaying_requester" : "Requested by:",
+"queue_title" : "Current queue for this server",
+"queue_empty" : "No songs left in this queue.",
+"queue_elements_not_shown" : "{} elements not shown."
 }

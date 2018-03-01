@@ -117,11 +117,13 @@ class myFFmpegPCMAudio(discord.AudioSource):
 		os.system('rm -f ' + self.fifo_file)
 
 class VoiceEntry:
-	def __init__(self, requester, channel, song_name, url):
+	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader):
 		self.requester=requester
 		self.channel=channel
 		self.name=song_name
 		self.url=url
+		self.thumbnail_url=thumbnail_url
+		self.uploader=uploader
 
 class VoiceState:
 	def __init__(self, bot):
@@ -157,14 +159,14 @@ class VoiceState:
 	async def audio_player_task(self):
 		while True:
 			self.play_next_song.clear()
-			self.current_song=await self.songs.get()
-#			await self.current_song.channel.send('Now playing ' + self.current_song.name + ', requested by: ' + self.current_song.requester.display_name)
+			self.current_song=None
 			wait=True
 			while wait:
 				if self.voice_client is not None:
 					if self.voice_client.is_connected():
 						wait=False
 				await asyncio.sleep(1.0)
+			self.current_song=await self.songs.get()
 			self.voice_client.play(discord.PCMVolumeTransformer(myFFmpegPCMAudio(self.current_song.url), volume=0.1), after=self.play_next)
 			await self.play_next_song.wait()
 
@@ -224,7 +226,17 @@ class Music:
 		else:
 			song_name=info['title']
 
-		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url)
+		if 'thumbnail' in info:
+			thumbnail_url=info['thumbnail']
+		else:
+			thumbnail_url=None
+
+		if 'uploader' in info:
+			uploader=info['uploader']
+		else:
+			uploader=None
+
+		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
 		await voice_state.songs.put(entry)
 		await ctx.send(config.strings['music']['enqueued_song'].format(song_name))
 
@@ -291,7 +303,17 @@ class Music:
 					await ctx.send(config.strings['music']['queue_full'])
 					return
 
-				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url)
+				if 'thumbnail' in info:
+					thumbnail_url=info['thumbnail']
+				else:
+					thumbnail_url=None
+
+				if 'uploader' in info:
+					uploader=info['uploader']
+				else:
+					uploader=None
+
+				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
 				await voice_state.songs.put(song_entry)
 		else:
 			await ctx.send(config.strings['music']['playytlist_no_playlist'])
@@ -326,9 +348,15 @@ class Music:
 		voice_state=self.get_voice_state(ctx.message.guild)
 
 		if voice_state.current_song == None:
-			await ctx.send(config.strings['music']['nowplaying_nothing'])
+			embed=discord.Embed(title=config.strings['music']['nowplaying_nothing'])
+			await ctx.send(embed=embed)
 		else:
-			await ctx.send(config.strings['music']['nowplaying_song'].format(voice_state.current_song.name))
+			embed=discord.Embed(title=config.strings['music']['nowplaying_song'])
+			embed.add_field(name=config.strings['music']['nowplaying_title'], value=voice_state.current_song.name)
+			embed.add_field(name=config.strings['music']['nowplaying_uploader'], value=voice_state.current_song.uploader)
+			embed.add_field(name=config.strings['music']['nowplaying_requester'], value=voice_state.current_song.requester.display_name)
+			embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
+			await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def repeat(self, ctx):
@@ -338,6 +366,29 @@ class Music:
 		if previous is not None:
 			await voice_state.songs.put(previous)
 			await ctx.send(config.strings['music']['reenqueued_song'].format(previous.name))
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def queue(self, ctx):
+		voice_state=self.get_voice_state(ctx.message.guild)
+		songs=asyncio.Queue()
+		for t in range(0, voice_state.songs.qsize()):
+			tmp=await voice_state.songs.get()
+			await voice_state.songs.put(tmp)
+			await songs.put(tmp)
+
+		if songs.empty():
+			embed=discord.Embed(title=config.strings['music']['queue_title'], description=config.strings['music']['queue_empty'])
+		else:
+			embed=discord.Embed(title=config.strings['music']['queue_title'])
+			for i in range(1, 11):
+				song=await songs.get()
+				embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}\n{} {}'.format(config.strings['music']['nowplaying_uploader'], song.uploader, config.strings['music']['nowplaying_requester'], song.requester.display_name), inline=False)
+				if songs.empty():
+					break
+			if songs.qsize() > 0:
+				embed.set_footer(text=config.strings['music']['queue_elements_not_shown'].format(songs.qsize()))
+
+		await ctx.send(embed=embed)
 
 def setup(bot):
 	bot.add_cog(Music(bot))

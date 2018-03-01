@@ -21,6 +21,7 @@
 #SOFTWARE.
 
 from discord.ext import commands
+import discord
 import config
 
 class TestModule:
@@ -43,6 +44,20 @@ class TestModule:
 	@commands.command(pass_context=True)
 	async def echo(self, ctx, *, string : str):
 		await ctx.send(string)
+
+	@commands.command(pass_context=True)
+	async def embed(self, ctx):
+		embed=discord.Embed(title='Title', description='description', color=0x00ff00)
+		embed.set_thumbnail(url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
+		embed.set_author(name='ArkBot', url='https://github.com/Arkrissym/ArkBot', icon_url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
+		embed.add_field(name='name1', value='value1', inline=True)
+		embed.add_field(name='name2', value='value2', inline=True)
+		embed.add_field(name='name3', value='value3', inline=False)
+		embed.add_field(name='name4', value='value4', inline=False)
+		embed.set_image(url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
+		embed.set_footer(text='footer', icon_url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
+
+		await ctx.send(embed=embed)
 
 def setup(bot):
 	bot.add_cog(TestModule(bot))
