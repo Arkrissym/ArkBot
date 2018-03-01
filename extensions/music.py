@@ -304,12 +304,12 @@ class Music:
 					return
 
 				if 'thumbnail' in info:
-					thumbnail_url=info['thumbnail']
+					thumbnail_url=entry['thumbnail']
 				else:
 					thumbnail_url=None
 
 				if 'uploader' in info:
-					uploader=info['uploader']
+					uploader=entry['uploader']
 				else:
 					uploader=None
 
@@ -355,7 +355,8 @@ class Music:
 			embed.add_field(name=config.strings['music']['nowplaying_title'], value=voice_state.current_song.name)
 			embed.add_field(name=config.strings['music']['nowplaying_uploader'], value=voice_state.current_song.uploader)
 			embed.add_field(name=config.strings['music']['nowplaying_requester'], value=voice_state.current_song.requester.display_name)
-			embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
+			if voice_state.current_song.thumbnail_url != None:
+				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
