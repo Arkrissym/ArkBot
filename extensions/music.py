@@ -36,86 +36,6 @@ from logger import logger as log
 if not discord.opus.is_loaded():
 	discord.opus.load_opus('opus')
 
-class myFFmpegPCMAudio(discord.AudioSource):
-	def __init__(self, source, *, executable='ffmpeg', pipe=False, stderr=None, before_options=None, options=None):
-		stdin = None if not pipe else source
-
-		args = [executable]
-
-		if isinstance(before_options, str):
-			args.extend(shlex.split(before_options))
-
-		lsource=str('/tmp/music_cache_' + str(time.time()) + '.wav')
-		os.system('mkfifo ' + lsource)
-		self.fifo_file=lsource
-
-		args.extend(('-re', '-i'))
-		args.append(lsource)
-		args.extend(('-f', 's16le', '-ar', '48000', '-ac', '2', '-loglevel', 'error', '-bufsize', '512000k'))
-
-		if isinstance(options, str):
-			args.extend(shlex.split(options))
-
-		#added a buffer (better for livestreams)
-		args.append('pipe:1')
-
-		args2=executable
-		args2=args2 + str(' -i ')
-		args2=args2 + str('-' if pipe else str('\"' + source + '\"'))
-		args2=args2 + str(' -loglevel error -f wav -ar 48000 -ac 2 -vn')
-		args2=args2 + str(' pipe:1 | mbuffer -Q -q -v 0 -c -m 2048k > ' + lsource)
-
-		self._process = None
-		self._process2=None
-		try:
-			self._process2=subprocess.Popen(args2, stdin=stdin, shell=True)
-		except FileNotFoundError:
-			raise discord.ClientException(executable + ' was not found.') from None
-		except subprocess.SubprocessError as e:
-			raise discord.ClientException('Popen failed: {0.__class__.__name__}: {0}'.format(e)) from e
-
-		try:
-			self._process = subprocess.Popen(args, stdin=stdin, stdout=subprocess.PIPE, stderr=stderr)
-			self._stdout = self._process.stdout
-		except FileNotFoundError:
-			raise discord.ClientException(executable + ' was not found.') from None
-		except subprocess.SubprocessError as e:
-			raise discord.ClientException('Popen failed: {0.__class__.__name__}: {0}'.format(e)) from e
-
-	def read(self):
-		ret = self._stdout.read(discord.opus.Encoder.FRAME_SIZE)
-		if len(ret) != discord.opus.Encoder.FRAME_SIZE:
-			return b''
-		return ret
-
-	def cleanup(self):
-		proc = self._process2
-		if proc is not None:
-			proc.kill()
-			log.debug('Preparing to terminate ffmpeg process %s.', proc.pid)
-			proc.kill()
-			if proc.poll() is None:
-				log.info('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
-				proc.communicate()
-				log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
-			else:
-				log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
-		self._process2=None
-
-		proc = self._process
-		if proc is not None:
-			log.debug('Preparing to terminate ffmpeg process %s.', proc.pid)
-			proc.kill()
-			if proc.poll() is None:
-				log.info('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
-				proc.communicate()
-				log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
-			else:
-				log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
-		self._process = None
-
-		os.system('rm -f ' + self.fifo_file)
-
 class VoiceEntry:
 	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader):
 		self.requester=requester
@@ -167,7 +87,7 @@ class VoiceState:
 						wait=False
 				await asyncio.sleep(1.0)
 			self.current_song=await self.songs.get()
-			self.voice_client.play(discord.PCMVolumeTransformer(myFFmpegPCMAudio(self.current_song.url), volume=0.1), after=self.play_next)
+			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url), volume=0.1), after=self.play_next)
 			await self.play_next_song.wait()
 
 class Music:
@@ -303,7 +223,7 @@ class Music:
 		info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, playlist_link, False)
 
 		if (info['_type'] == 'playlist') and ('title' in info):
-			embed=discord.Embed(title=config.strings['music']['playytlist_enqueue'].format(info['title']), description=config.strings['music']['nowplaying_uploader'].format(info['uploader']))
+			embed=discord.Embed(title=config.strings['music']['playytlist_enqueue'].format(info['title']), description='{} {}'.format(config.strings['music']['nowplaying_uploader'], info['uploader']))
 
 			if 'thumbnail' in info:
 				embed.set_thumbnail(url=info['thumbnail'])
