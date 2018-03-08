@@ -21,88 +21,100 @@
 #SOFTWARE.
 
 from discord.ext import commands
-import dataBase
-import config
+import discord
 
 import urllib.request
+import urllib.error
 import json
 import time
+
+import dataBase
+import config
+from logger import logger as log
 
 class LeagueOfLegends:
 	def __init__(self, bot):
 		self.bot=bot
 		self.lastrun=time.time()
 		keyFile=open("riotKey.txt", "r")
-		self.key=keyFile.readline()
+		self.key=keyFile.readline()[:-1]
 		keyFile.close()
 
-	def getDataByName(self, name, apiLink):
-#		global lastrun
-
-		fetchtime=dataBase.readVal('lolStat/summoner/' + name.lower(), 'fetchtime')
+	def getData(self, name):
+		fetchtime=dataBase.readVal('lolStat/' + name.lower(), 'fetchtime')
 		if (fetchtime > 0) and (fetchtime+300 > time.time()):
-			data=dataBase.dump('lolStat/summoner/' + name.lower())
+#			print('lolStat/' + name + '.json')
+			data=dataBase.dump('lolStat/' + name.lower())
 			if data == {}:
-				return {'lolStatStatus' : 'failed'}
-			else:
-				data.update({'lolStatStatus' : 'cache'})
+				return None
 			return data
 
-		elif self.lastrun+4 > time.time():
-			print('timeout. searching for cached results')
-#			await client.send_message(message.channel, 'Nur ein Request alle 4 Sekunden möglich.')
-			data=dataBase.dump('lolStat/summoner/' + name.lower())
+		elif self.lastrun > time.time():
+			log.info('lolStat.getData: timeout. searching for cached results')
+			data=dataBase.dump('lolStat/' + name.lower())
 			if data == {}:
-				return {'lolStatStatus' : 'failed'}
-			else:
-				data.update({'lolStatStatus' : 'cache'})
+				return None
 			return data
 
 		else:
-			link='https://euw1.api.riotgames.com' + apiLink + '/by-name/' + name + '?api_key=' + self.key
-#			print(link)
-			with urllib.request.urlopen(link) as url:
-				self.lastrun=time.time()
+			link='https://euw1.api.riotgames.com/' + name
+			log.info('lolStat.getData: downloading {}'.format(link))
+			req=urllib.request.Request(link)
+			req.add_header('X-Riot-Token', self.key)
+			try:
+				url=urllib.request.urlopen(req)
+#				self.lastrun=time.time()
+			except urllib.error.HTTPError as e:
+				if e.code == 429:
+					self.lastrun=time.time() + int(url.info().getheader('Retry-After'))
+					log.info('lolStat.getData: got 429: timeout. searching for cached results')
+					data=dataBase.dump('lolStat/' + name.lower())
+					if data == {}:
+						return None
+					return data
+				else:
+					log.error('lolStat.getData: HTTPError: {}'.format(e.code))
+			except urllib.error.URLError as e:
+				log.error('lolStat.getData: URLError: {}'.format(e.reason))
+			else:
 				data = json.loads(url.read().decode())
 
-				for keyName in data.keys():
-					dataBase.writeVal('lolStat/summoner/' + name.lower(), keyName, data[keyName])
-				dataBase.writeVal('lolStat/summoner/' + name.lower(), 'fetchtime', time.time())
+				if isinstance(data, list):
+					data={'data' : data}
+					for keyName in data.keys():
+						dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
+					dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
 
-				data.update({'lolStatStatus' : 'success'})
 				return data
 
-		return {'lolStatStatus' : 'failed'}
+		return None
 
-#	@commands.command(description='Get the lummoner-level in League of Legends', pass_context=True)
-	@commands.command(description=config.strings['lolStat']['lstatlevel_description'], pass_context=True)
-	async def lstatlevel(self, ctx, name : str):
+	@commands.command(pass_context=True)
+	async def getPlayerInfo(self, ctx, name : str):
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
 
-		data=self.getDataByName(summoner, '/lol/summoner/v3/summoners')
-#		print(data)
+		data=self.getData('lol/summoner/v3/summoners/by-name/' + summoner)
+		versions=self.getData('lol/static-data/v3/versions')
 
-		if data['lolStatStatus'] == 'success':
+		if data != None:
 			level=data['summonerLevel']
 			summoner=data['name']
+			icon_id=data['profileIconId']
+			version=versions['data'][0]
 
-#			await ctx.send('Spieler ' + summoner + ' ist Level ' + str(level))
-			await ctx.send(config.strings['lolStat']['lstatlevel_msg'].format(summoner, str(level)))
-		elif data['lolStatStatus'] == 'cache':
-			level=data['summonerLevel']
-			summoner=data['name']
+			embed=discord.Embed(title=summoner)
+			embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png'.format(version, icon_id))
 
-#			await ctx.send('Spieler ' + summoner + ' ist Level ' + str(level) + '. (Aus Datenbank gelesen)')
-			await ctx.send(config.strings['lolStat']['lstatlevel_msg'].format(summoner, str(level)))
-		elif data['lolStatStatus'] == 'timeout':
-			level=data['summonerLevel']
-			summoner=data['name']
+			embed.add_field(name=config.strings['lolStat']['playerInfo_level'], value=level)
 
-#			await ctx.send('Spieler ' + summoner + ' ist Level ' + str(level) + '. (Aus Datenbank gelesen wegen Timeout)')
-			await ctx.send(config.strings['lolStat']['lstatlevel_msg'].format(summoner, str(level)))
+			league=self.getData('lol/league/v3/positions/by-summoner/{}'.format(data['id']))
+			if league != None:
+				for l in league['data']:
+					embed.add_field(name=config.strings['lolStat']['playerInfo_rank'], value='{} {}'.format(l['tier'], l['rank']))
+
+			await ctx.send(embed=embed)
 		else:
-#			await ctx.send('Fehler bei der Abfrage')
 			await ctx.send(config.strings['lolStat']['lstatlevel_fail'])
 
 def setup(bot):

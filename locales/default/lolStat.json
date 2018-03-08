@@ -1,5 +1,5 @@
 {
-"lstatlevel_description" : "Get the lummoner-level in League of Legends",
-"lstatlevel_msg" : "Summoner {0} has reached level {1}.",
-"lstatlevel_fail" : "An error occured while processing your request."
+"playerInfo_level" : "level:",
+"playerInfo_rank" : "rank:",
+"playerInfo_fail" : "Failed to retrieve player information."
 }
