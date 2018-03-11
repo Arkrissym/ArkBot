@@ -34,7 +34,14 @@ import config
 from logger import logger as log
 
 if not discord.opus.is_loaded():
-	discord.opus.load_opus('opus')
+	try:
+		discord.opus.load_opus('opus')
+	except:
+		try:
+			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
+		except:
+			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
+			
 
 class VoiceEntry:
 	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader):
@@ -87,7 +94,7 @@ class VoiceState:
 						wait=False
 				await asyncio.sleep(1.0)
 			self.current_song=await self.songs.get()
-			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url), volume=0.1), after=self.play_next)
+			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel panic'), volume=0.1), after=self.play_next)
 			await self.play_next_song.wait()
 
 class Music:
