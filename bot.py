@@ -35,7 +35,7 @@ bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot'][
 async def on_ready():
 	logger.info('Logged in as ' + bot.user.name)
 	logger.info('discord.py version: ' + discord.__version__)
-	await bot.change_presence(status=discord.Status.online, game=discord.Game(name='github.com/Arkrissym/ArkBot'), afk=False)
+	await bot.change_presence(status=discord.Status.online, activity=discord.Game(name='github.com/Arkrissym/ArkBot'), afk=False)
 
 @bot.event
 async def on_disconnect():
