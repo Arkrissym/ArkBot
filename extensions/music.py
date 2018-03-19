@@ -59,6 +59,7 @@ class VoiceState:
 		self.previous_song=None
 		self.voice_client=None
 		self.voice_channel=None
+		self.loop=False
 		self.songs=asyncio.Queue(maxsize=1000)
 		self.play_next_song=asyncio.Event()
 		self.audio_player=self.bot.loop.create_task(self.audio_player_task())
@@ -86,6 +87,8 @@ class VoiceState:
 	async def audio_player_task(self):
 		while True:
 			self.play_next_song.clear()
+			if self.loop == True and self.previous_song != None:
+				await self.songs.put(self.previous_song)
 			self.current_song=None
 			wait=True
 			while wait:
@@ -94,7 +97,7 @@ class VoiceState:
 						wait=False
 				await asyncio.sleep(1.0)
 			self.current_song=await self.songs.get()
-			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel panic'), volume=0.1), after=self.play_next)
+			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.1), after=self.play_next)
 			await self.play_next_song.wait()
 
 class Music:
@@ -309,6 +312,23 @@ class Music:
 			if voice_state.current_song.thumbnail_url != None:
 				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
+
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def loop(self, ctx, mode : str=None):
+		voice_state=self.get_voice_state(ctx.message.guild)
+		
+		if mode == 'on':
+			voice_state.loop=True
+			await ctx.send(config.strings['music']['loop_on'])
+		elif mode == 'off':
+			voice_state.loop=False
+			await ctx.send(config.strings['music']['loop_off'])
+		elif mode == None:
+			if voice_state.loop == True:
+				await ctx.send(config.strings['music']['loop_on'])
+			else:
+				await ctx.send(config.strings['music']['loop_off'])
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def repeat(self, ctx):

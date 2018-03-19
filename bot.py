@@ -66,10 +66,6 @@ async def on_message(message):
 
 @bot.event
 async def on_member_join(member):
-#	Msg=[
-#		['Willkommen ', '. Denk immer dran: nachts ist es kälter als draußen'],
-#		['Willkommen ', '. Denk immer dran: Pommes schmecken besser als mit Ketchup.']
-#	]
 	Msg=config.strings['bot']['member_join_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
@@ -81,10 +77,6 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-#	Msg=[
-#		[' ', ' ist abgedampft. OK Tschüüüüüüsss!'],
-#		[' ', ' hat n Abgang gemacht.']
-#	]
 	Msg=config.strings['bot']['member_remove_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
