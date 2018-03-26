@@ -27,6 +27,7 @@ import urllib.request
 import urllib.error
 import json
 import time
+import os
 
 import dataBase
 import config
@@ -36,9 +37,15 @@ class LeagueOfLegends:
 	def __init__(self, bot):
 		self.bot=bot
 		self.lastrun=time.time()
-		keyFile=open("riotKey.txt", "r")
-		self.key=keyFile.readline()[:-1]
-		keyFile.close()
+		try:
+			keyFile=open("riotKey.txt", "r")
+			self.key=keyFile.readline()[:-1]
+			keyFile.close()
+		except:
+			self.key=os.getenv("RIOT_KEY")
+
+			if self.key == None:
+				log.error("No Riot Key found. Please save a riotKey.txt or specify a environment variable 'RIOT_KEY'.")
 
 	def getData(self, name):
 		fetchtime=dataBase.readVal('lolStat/' + name.lower(), 'fetchtime')

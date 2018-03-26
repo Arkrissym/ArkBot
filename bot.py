@@ -22,8 +22,10 @@
 
 import discord
 from discord.ext import commands
+
 import asyncio
 import random
+import os
 
 from logger import logger
 import config
@@ -112,11 +114,16 @@ for ext in config.config['bot']['extensions'].split():
 		logger.error('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
 
 #read the token from token.txt
-tokenFile=open("token.txt", "r")
-token=tokenFile.readline()
-tokenFile.close()
+try:
+	tokenFile=open("token.txt", "r")
+	token=tokenFile.readline()
+	tokenFile.close()
+	#remove \n at the end of the line
+	token=token[:-1]
+except:
+	token=os.getenv("DISCORD_TOKEN")
 
-#remove \n at the end of the line
-token=token[:-1]
-
-bot.run(token)
+if token == None:
+	logger.fatal("No token for discord found. Please save a token.txt or specify a environment variable 'DISCORD_TOKEN'.")
+else:
+	bot.run(token)
