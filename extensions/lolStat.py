@@ -73,7 +73,7 @@ class LeagueOfLegends:
 #				self.lastrun=time.time()
 			except urllib.error.HTTPError as e:
 				if e.code == 429:
-					self.lastrun=time.time() + int(url.info().getheader('Retry-After'))
+					self.lastrun=time.time() + int(e.headers['Retry-After'])
 					log.info('lolStat.getData: got 429: timeout. searching for cached results')
 					data=dataBase.dump('lolStat/' + name.lower())
 					if data == {}:
@@ -123,6 +123,26 @@ class LeagueOfLegends:
 			await ctx.send(embed=embed)
 		else:
 			await ctx.send(config.strings['lolStat']['lstatlevel_fail'])
+
+	@commands.command(pass_context=True)
+	async def getChampionRotation(self, ctx):
+		data=self.getData("lol/platform/v3/champions?freeToPlay=true")
+		allChampionData=self.getData("lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(config.config["bot"]["locale"]))
+
+		embed=discord.Embed(title=config.strings["lolStat"]["championRotationTitle"])
+
+		for champion in data["champions"]:
+			championData=allChampionData["data"]["{}".format(champion["id"])]
+
+			#print(championData["name"])
+			tags=config.strings["lolStat"][championData["tags"][0]]
+			for i in range(1, len(championData["tags"])):
+				#print(config.strings["lolStat"][tag])
+				tags="{}, {}".format(tags, config.strings["lolStat"][championData["tags"][i]])
+			
+			embed.add_field(name=championData["name"], value=tags)
+
+		await ctx.send(embed=embed)
 
 def setup(bot):
 	bot.add_cog(LeagueOfLegends(bot))

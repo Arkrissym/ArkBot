@@ -1,5 +1,12 @@
 {
-"playerInfo_level" : "Level:",
-"playerInfo_rank" : "Rang:",
-"playerInfo_fail" : "Fehler beim abrufen der Informationen."
+	"playerInfo_level": "Level:",
+	"playerInfo_rank": "Rang:",
+	"playerInfo_fail": "Fehler beim abrufen der Informationen.",
+	"championRotationTitle": "Current champion rotation",
+	"Assassin": "Assassine",
+	"Fighter": "Kämpfer",
+	"Mage": "Magier",
+	"Marksman": "Schütze",
+	"Support": "Supporter",
+	"Tank": "Tank"
 }

@@ -1,5 +1,12 @@
 {
-"playerInfo_level" : "level:",
-"playerInfo_rank" : "rank:",
-"playerInfo_fail" : "Failed to retrieve player information."
+	"playerInfo_level": "level:",
+	"playerInfo_rank": "rank:",
+	"playerInfo_fail": "Failed to retrieve player information.",
+	"championRotationTitle": "Current champion rotation",
+	"Assassin": "Assassin",
+	"Fighter": "Fighter",
+	"Mage": "Mage",
+	"Marksman": "Marksman",
+	"Support": "Support",
+	"Tank": "Tank"
 }
