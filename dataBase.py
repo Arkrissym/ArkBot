@@ -29,7 +29,7 @@ def dump(prefix):
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
-		with open(filename, 'r') as file:
+		with open(filename, 'r', encoding='utf-8') as file:
 			data=json.load(file)
 			return data
 	except:
@@ -41,7 +41,7 @@ def readVal(prefix, valName):
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
-		with open(filename, 'r') as file:
+		with open(filename, 'r', encoding='utf-8') as file:
 			data=json.load(file)
 			for key in data.keys():
 				if key == valName:
@@ -55,7 +55,7 @@ def writeVal(prefix, valName, val):
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
-		with open(filename, 'r') as file:
+		with open(filename, 'r', encoding='utf-8') as file:
 			data={}
 			data=json.load(file)
 			file.close()
@@ -65,7 +65,7 @@ def writeVal(prefix, valName, val):
 		return 0
 
 	try:
-		with open(filename, 'w') as file:
+		with open(filename, 'w', encoding='utf-8') as file:
 			data.update({valName : val})
 			json.dump(data, file)
 			return 1

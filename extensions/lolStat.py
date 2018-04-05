@@ -64,7 +64,7 @@ class LeagueOfLegends:
 			return data
 
 		else:
-			link='https://euw1.api.riotgames.com/' + name
+			link='https://euw1.api.riotgames.com/' + name.lower()
 			log.info('lolStat.getData: downloading {}'.format(link))
 			req=urllib.request.Request(link)
 			req.add_header('X-Riot-Token', self.key)
@@ -88,9 +88,9 @@ class LeagueOfLegends:
 
 				if isinstance(data, list):
 					data={'data' : data}
-					for keyName in data.keys():
-						dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
-					dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
+				for keyName in data.keys():
+					dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
+				dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
 
 				return data
 

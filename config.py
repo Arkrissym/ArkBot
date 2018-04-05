@@ -36,7 +36,7 @@ def load_locales(locale):
 		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
 			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
 				try:
-					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r') as str_file:
+					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
 						data=json.load(str_file)
 						for key in data.keys():
 							strings[file[:-5]][key]=data[key]
@@ -59,7 +59,7 @@ if _initialized == False:
 		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
 			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
 				try:
-					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r') as str_file:
+					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
 						strings[file[:-5]]=json.load(str_file)
 				except Exception as e:
 					log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
@@ -76,7 +76,6 @@ if _initialized == False:
 
 class Config:
 	def __init__(self, bot):
-		from discord.ext import commands
 		self.bot=bot
 
 	@commands.command(pass_context=True)
@@ -110,4 +109,3 @@ class Config:
 
 def setup(bot):
 	bot.add_cog(Config(bot))
-
