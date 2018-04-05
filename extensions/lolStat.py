@@ -64,7 +64,7 @@ class LeagueOfLegends:
 			return data
 
 		else:
-			link='https://euw1.api.riotgames.com/' + name.lower()
+			link='https://euw1.api.riotgames.com/' + name
 			log.info('lolStat.getData: downloading {}'.format(link))
 			req=urllib.request.Request(link)
 			req.add_header('X-Riot-Token', self.key)
