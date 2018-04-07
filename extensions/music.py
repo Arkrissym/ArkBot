@@ -112,9 +112,15 @@ class Music:
 			self.voice_states[server.id]=state
 		return state
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(pass_context=True, no_pm=True, aliases=["summon"])
 #	@commands.has_permissions(administrator=True)
-	async def join(self, ctx, *, channel : discord.VoiceChannel):
+	async def join(self, ctx, *, channel : discord.VoiceChannel=None):
+		if channel == None:
+			if ctx.message.author.voice.channel == None:
+				return
+			else:
+				channel=ctx.message.author.voice.channel
+
 		state=self.get_voice_state(ctx.message.guild)
 		try:
 			state.voice_client=await channel.connect()
