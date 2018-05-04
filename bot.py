@@ -46,7 +46,7 @@ async def on_disconnect():
 @bot.event
 async def on_message(message):
 #	check, if message has been sent by this bot
-	if message.author == bot.user:
+	if message.author == bot.user or message.author.bot:
 		return
 
 	if len(message.content) > 1:

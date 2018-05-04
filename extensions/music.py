@@ -278,7 +278,7 @@ class Music:
 		else:
 			await ctx.send(config.strings['music']['playytlist_no_playlist'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(pass_context=True, no_pm=True, aliases=["quit"])
 #	@commands.has_permissions(administrator=True)
 	async def stop(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
