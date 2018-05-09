@@ -25,6 +25,8 @@ from datetime import datetime
 import time
 import asyncio
 
+import config
+
 class ClearHistory:
 	def __init__(self, bot):
 		self.bot=bot
@@ -36,8 +38,8 @@ class ClearHistory:
 		async for log in ctx.message.channel.history(limit=None, after=datetime.utcfromtimestamp(time.time()-86400)):
 			if log.author == self.bot.user:
 				msgs.append(log)
-			elif len(log.content) > 1:
-				if self.bot.get_command(log.content[1:]):
+			elif len(log.content) > 1 and log.content.startswith(config.config['bot']['cmd_prefix']):
+				if self.bot.get_command(log.content[len(config.config['bot']['cmd_prefix']):]):
 					msgs.append(log)
 
 		await ctx.message.channel.delete_messages(msgs)

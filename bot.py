@@ -31,7 +31,8 @@ from logger import logger
 import config
 import dataBase
 
-bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
+#bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
+bot=commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
 
 @bot.event
 async def on_ready():
@@ -45,12 +46,12 @@ async def on_disconnect():
 
 @bot.event
 async def on_message(message):
-#	check, if message has been sent by this bot
+#	check, if message has been sent by this bot or another bot
 	if message.author == bot.user or message.author.bot:
 		return
 
 	if len(message.content) > 1:
-		cmd=bot.get_command(message.content[1:])
+		cmd=bot.get_command(message.content[len(config.config['bot']['cmd_prefix']):])
 		if cmd:
 			try:
 				logger.info('command ' + cmd.name + ' called.')
