@@ -23,6 +23,7 @@
 import json
 import pathlib
 import os
+import psycopg2
 
 def dump(prefix):
 	filename='dataBase/' + prefix + '.json'
@@ -71,3 +72,38 @@ def writeVal(prefix, valName, val):
 			return 1
 	except:
 		return 0
+
+def sqlReadRow(name):
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+	cur.execute("SELECT * FROM config")
+	
+	count = 0
+	for row in cur:
+		print("row " + str(count) + ": " + row)
+		count += 1
+		if row[0] == name:
+			return row
+
+	return None
+
+def sqlWriteRow(name, row):
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+	
+	sql_string="""
+		INSERT INTO config (name{})
+		VALUES ({}{})
+		"""
+
+	names = ""
+	vals = ""
+	count = 0
+	for val in row:
+		names = names + ", value" + str(count)
+		vals = vals + ", " + val
+		count += 1
+
+	cur.execute(sql_string)
+	
+	return 1

@@ -26,6 +26,7 @@ import os
 import discord
 from discord.ext import commands
 from logger import logger as log
+import dataBase
 
 config={}
 strings={}
@@ -78,7 +79,7 @@ class Config:
 	def __init__(self, bot):
 		self.bot=bot
 
-	@commands.command(pass_context=True)
+	@commands.command(pass_context=True, no_pm=True)
 	@commands.is_owner()
 	async def list_locales(self, ctx):
 		text=str()
@@ -89,7 +90,7 @@ class Config:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True)
+	@commands.command(pass_context=True, no_pm=True)
 	@commands.is_owner()
 	async def set_locale(self, ctx, *, locale : str):
 		locale_avail=False
@@ -104,6 +105,8 @@ class Config:
 				config['bot']['locale']=locale
 
 			await ctx.send(strings['config']['set_locale'].format(locale))
+
+			dataBase.sqlWriteRow(ctx.guild.id, {"!", locale})
 		else:
 			await ctx.send(strings['config']['locale_not_found'].format(locale))
 

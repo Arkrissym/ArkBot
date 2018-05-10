@@ -4,3 +4,4 @@ youtube_dl
 googletrans
 pycountry
 babel
+psycopg2
