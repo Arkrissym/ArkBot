@@ -51,6 +51,10 @@ async def on_ready():
 	logger.info('discord.py version: ' + discord.__version__)
 	await bot.change_presence(status=discord.Status.online, activity=discord.Game(name='github.com/Arkrissym/ArkBot'), afk=False)
 
+	#fetch config from database
+	for g in bot.guilds:
+		config.getLocale(g.id)
+
 @bot.event
 async def on_disconnect():
 	bot.connect()
