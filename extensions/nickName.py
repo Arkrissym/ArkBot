@@ -30,50 +30,50 @@ import config
 class Nickname:
 	def __init__(self, bot):
 		self.bot=bot
-		self.nameList=[
-			'Noname',
-			'Alphakevin',
-			'Chantal',
-			'Teemo',
-			'Peter Müller, Klasse 2C',
-			'Count Schoko',
-			'Bob Ross',
-			'Donald Trump',
-			'Angela Merkel',
-			'Barack Obama',
-			'Zeuge Seehofas',
-			'Karsten Stahl',
-			'Hans Jörg'
-		]
+		#self.nameList=[
+		#	'Noname',
+		#	'Alphakevin',
+		#	'Chantal',
+		#	'Teemo',
+		#	'Peter Müller, Klasse 2C',
+		#	'Count Schoko',
+		#	'Bob Ross',
+		#	'Donald Trump',
+		#	'Angela Merkel',
+		#	'Barack Obama',
+		#	'Zeuge Seehofas',
+		#	'Karsten Stahl',
+		#	'Hans Jörg'
+		#]
 
-		self.fake=Faker(config.config['nickName']['Faker_locale'])
+		#self.fake=Faker(config.config['nickName']['Faker_locale'])
 
-	@commands.command(pass_context=True, hidden=True, no_pm=True)
-	async def yourmom(self, ctx):
-		oldName=ctx.author.nick
-		await ctx.author.edit(nick='Deine Mudda')
-		await asyncio.sleep(20)
-		await ctx.author.edit(nick=oldName)
-		await ctx.message.delete()
+	#@commands.command(pass_context=True, hidden=True, no_pm=True)
+	#async def yourmom(self, ctx):
+	#	oldName=ctx.author.nick
+	#	await ctx.author.edit(nick='Deine Mudda')
+	#	await asyncio.sleep(20)
+	#	await ctx.author.edit(nick=oldName)
+	#	await ctx.message.delete()
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def randomnick(self, ctx):
-		if random.randint(0, 2) < 1:
-			await ctx.author.edit(nick=self.nameList[random.randint(0, len(nameList) - 1)])
-		else:
-			await ctx.author.edit(nick=self.fake.name())
+		#if random.randint(0, 2) < 1:
+		#	await ctx.author.edit(nick=self.nameList[random.randint(0, len(nameList) - 1)])
+		#else:
+		await ctx.author.edit(nick=Faker(config.getLocale(ctx.guild.id)).name())
 
 	@commands.command(pass_context=True, no_pm=True)
 #	@commands.has_permissions(change_nickname=True)
-	async def setnick(self, ctx, newNick : str):
+	async def setnick(self, ctx, newNick : str=None):
 		if newNick:
 			await ctx.author.edit(nick=newNick)
 		else:
-			await ctx.author.edit(nick=config.strings['nickName']['idiot'])
+			await ctx.author.edit(nick=config.strings[config.getLocale(ctx.guild.id)]['nickName']['idiot'])
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def idiot(self, ctx):
-		await ctx.author.edit(nick=config.strings['nickName']['idiot'])
+		await ctx.author.edit(nick=config.strings[config.getLocale(ctx.guild.id)]['nickName']['idiot'])
 
 def setup(bot):
 	bot.add_cog(Nickname(bot))

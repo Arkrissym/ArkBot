@@ -11,7 +11,7 @@ class Translator:
 
 	async def on_reaction_add(self, reaction, user):
 		if isinstance(reaction.emoji, discord.Emoji):
-			print("discord.Emoji")
+			#print("discord.Emoji")
 			name=reaction.emoji.name
 		else:
 			name=reaction.emoji

@@ -26,25 +26,53 @@ import os
 import discord
 from discord.ext import commands
 from logger import logger as log
-import dataBase
+import psycopg2
+import psycopg2.extras
+from psycopg2 import sql
 
 config={}
 strings={}
 _initialized=False
 
-def load_locales(locale):
+guild_config={}
+
+def load_locales():
 	try:
-		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
-			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
-				try:
-					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
+		for locale in os.listdir('{}/locales/'.format(os.path.dirname(__file__))):
+			#print(locale)
+			strings.update({locale : {}})
+			#load default strings first
+			try:
+				for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), "default")):
+					#print(file)
+					if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file)) and file.endswith('.json'):
+						try:
+						#with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file), 'r', encoding='utf-8') as str_file:
+							str_file = open('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file), 'r', encoding='utf-8')
+							strings[locale][file[:-5]]=json.load(str_file)
+							str_file.close()
+						except Exception as e:
+							log.warning('{}: failed to open {}: {}'.format("Default", file, str(e)))
+			except Exception as e:
+				log.error('failed to load default strings: {}'.format(str(e)))
+
+			#load translation
+			for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
+				if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
+					try:
+						#with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
+						str_file = open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8')
 						data=json.load(str_file)
 						for key in data.keys():
-							strings[file[:-5]][key]=data[key]
-				except Exception as e:
-					log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
+							strings[locale][file[:-5]][key]=data[key]
+						#strings[locale][file[:-5]]=json.load(str_file)
+						str_file.close()
+					except Exception as e:
+						log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
+
+		#print(strings)
 	except Exception as e:
-		log.error('failed to load translation: {}'.format(str(e)))
+		log.error('failed to load strings: {}'.format(str(e)))
 
 
 if _initialized == False:
@@ -54,44 +82,103 @@ if _initialized == False:
 	except Exception as e:
 		log.error('failed to load config: ' + str(e))
 
-	locale='default'
-
-	try:
-		for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
-			if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
-				try:
-					with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
-						strings[file[:-5]]=json.load(str_file)
-				except Exception as e:
-					log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
-	except Exception as e:
-		log.error('failed to load default strings: {}'.format(str(e)))
-
-	if 'bot' in config:
-		if 'locale' in config['bot']:
-			locale=config['bot']['locale']
-			if locale != 'default':
-				load_locales(locale)
+	load_locales()
 
 	_initialized=True
+
+
+def sqlReadConfig(id):
+	#print(guild_config)
+	for guild_id in guild_config.keys():
+		if guild_id == str(id):
+			return [id, guild_config[guild_id]["prefix"], guild_config[guild_id]["locale"]]
+
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+	#cur.execute("SELECT * FROM config")
+	cur.execute(sql.SQL("SELECT * FROM config WHERE id = %s"), [str(id)])
+
+	ret = None
+	#count = 0
+	for row in cur:
+		#print("row " + str(count) + ": " + row[0] + " | " + row[1] + " | " + row[2])
+		#count += 1
+		if row[0] == str(id):
+			ret = row
+			guild_config[str(id)]={
+				"prefix" : ret[1],
+				"locale" : ret[2]
+				}
+
+	cur.close()
+	conn.close()
+
+	return ret
+
+def sqlSaveConfig(id, prefix, locale):
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	cur=conn.cursor()
+
+	old = sqlReadConfig(id)
+	if old == None:
+		cur.execute(sql.SQL("INSERT INTO config VALUES (%s, %s, %s)"), [str(id), prefix, locale])
+	else:
+		cur.execute(sql.SQL("UPDATE config SET id = %s, prefix = %s, locale = %s WHERE id = %s"), [str(id), prefix, locale, str(id)])	
+	
+	conn.commit()
+
+	cur.close()
+	conn.close()
+
+	guild_config[str(id)]={
+		"prefix" : prefix,
+		"locale" : locale
+		}
+
+	return 1
+
+def getPrefix(guild_id):
+	try:
+		data=sqlReadConfig(guild_id)
+	except:
+		return config['bot']['cmd_prefix']
+
+	if data == None:
+			return config['bot']['cmd_prefix']
+
+	return data[1]
+
+def getLocale(guild_id):
+	try:
+		data=sqlReadConfig(guild_id)
+	except:
+		return config['bot']['cmd_prefix']
+
+	if data == None:
+		return config['bot']['cmd_prefix']
+
+	return data[2]
+
 
 class Config:
 	def __init__(self, bot):
 		self.bot=bot
 
 	@commands.command(pass_context=True, no_pm=True)
-	@commands.is_owner()
+	#@commands.is_owner()
+	@commands.has_permissions(administrator=True)
 	async def list_locales(self, ctx):
 		text=str()
 		for locale in os.listdir('{}/locales/'.format(os.path.dirname(__file__))):
 			text='{}\n{}'.format(text, locale)
 
-		embed=discord.Embed(title=strings['config']['list_of_locales'], description=text)
+		embed=discord.Embed(title=strings[getLocale(ctx.guild.id)]['config']['list_of_locales'], description=text)
 
 		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
-	@commands.is_owner()
+	#@commands.is_owner()
+	@commands.has_permissions(administrator=True)
 	async def set_locale(self, ctx, *, locale : str):
 		locale_avail=False
 
@@ -100,15 +187,21 @@ class Config:
 				locale_avail=True
 
 		if locale_avail:
-			load_locales(locale)
-			if 'bot' in config:
-				config['bot']['locale']=locale
+			sqlSaveConfig(ctx.guild.id, getPrefix(ctx.guild.id), locale)
 
-			await ctx.send(strings['config']['set_locale'].format(locale))
-
-			dataBase.sqlWriteRow(ctx.guild.id, {"!", locale})
+			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['set_locale'].format(locale))
 		else:
-			await ctx.send(strings['config']['locale_not_found'].format(locale))
+			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['locale_not_found'].format(locale))
+
+	@commands.command(pass_context=True, no_pm=True)
+	#@commands.is_owner()
+	@commands.has_permissions(administrator=True)
+	async def set_prefix(self, ctx, prefix : str):
+		if len(prefix) == 0 or len(prefix) > 5 or prefix.startswith("@") or prefix.startswith("#"):
+			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['invalid_prefix'])
+		else:
+			sqlSaveConfig(ctx.guild.id, prefix, getLocale(ctx.guild.id))
+			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['set_prefix'].format(prefix))
 
 def setup(bot):
 	bot.add_cog(Config(bot))

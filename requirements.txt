@@ -5,3 +5,4 @@ googletrans
 pycountry
 babel
 psycopg2
+aiohttp>=2.3.0

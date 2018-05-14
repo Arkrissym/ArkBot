@@ -27,17 +27,20 @@ import config
 class Time:
 	def __init__(self, bot):
 		self.bot=bot
-		self.list=config.strings['zeit']['time_answers']
-		self.triggers=config.strings['zeit']['time_triggers']
 
-	@commands.command(pass_context=True, aliases=config.strings['zeit']['time_aliases'])
+	@commands.command(pass_context=True)
 	async def time(self, ctx):
-		await ctx.send(self.list[random.randint(0, len(self.list) - 1)])
+		list=config.strings[config.getLocale(ctx.guild.id)]['zeit']['time_answers']
+		await ctx.send(list[random.randint(0, len(self.list) - 1)])
 
 	async def on_message(self, message):
-		for trig in self.triggers:
-			if message.content == trig:
-				await message.channel.send(self.list[random.randint(0, len(self.list) - 1)])
+		if message.guild:
+			list=config.strings[config.getLocale(message.guild.id)]['zeit']['time_answers']
+			triggers=config.strings[config.getLocale(message.guild.id)]['zeit']['time_triggers']
+			
+			for trig in triggers:
+				if message.content == trig:
+					await message.channel.send(list[random.randint(0, len(self.list) - 1)])
 
 
 def setup(bot):

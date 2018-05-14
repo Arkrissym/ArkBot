@@ -28,18 +28,25 @@ class TestModule:
 	def __init__(self, bot):
 		self.bot=bot
 
-	@commands.command(pass_context=True)
+	@commands.command(pass_context=True, no_pm=True)
 	async def test(self, ctx):
 		counter=0
 #		tmp = await ctx.send('Calculating messages...')
-		tmp = await ctx.send(config.strings['testModule']['calc_messages'])
+		tmp = await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['testModule']['calc_messages'])
 		async for log in ctx.message.channel.history(limit=1000):
 			if log.author == ctx.message.author:
-				if not self.bot.get_command(log.content[1:]):
+				cmd=None
+
+				if (ctx.guild != None) and ctx.message.content.startswith(config.getPrefix(ctx.guild.id)):
+					cmd=self.bot.get_command(ctx.message.content[len(config.getPrefix(ctx.guild.id)):])
+				elif message.content.startswith(config.config['bot']['cmd_prefix']):
+					cmd=self.bot.get_command(ctx.message.content[len(config.config['bot']['cmd_prefix']):])
+				#if not self.bot.get_command(log.content[1:]):
+				if cmd == None:
 					counter+=1
 
 #		await tmp.edit(content='You have {} messages.'.format(counter))
-		await tmp.edit(content=config.strings['testModule']['sum_messages'].format(counter))
+		await tmp.edit(content=config.strings[config.getLocale(ctx.guild.id)]['testModule']['sum_messages'].format(counter))
 
 	@commands.command(pass_context=True)
 	async def echo(self, ctx, *, string : str):
@@ -58,6 +65,10 @@ class TestModule:
 		embed.set_footer(text='footer', icon_url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
 
 		await ctx.send(embed=embed)
+
+	@commands.command(pass_context=True)
+	async def prefix(self, ctx):
+		await ctx.send(ctx.prefix)
 
 def setup(bot):
 	bot.add_cog(TestModule(bot))

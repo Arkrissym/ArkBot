@@ -1,5 +1,7 @@
 {
-"list_of_locales" : "List of available locales",
-"set_locale" : "Set locale to {}",
-"locale_not_found" : "Locale '{}' not found"
+  "list_of_locales": "List of available locales",
+  "set_locale": "Set locale to {}",
+  "locale_not_found": "Locale '{}' not found",
+  "invalid_prefix": "invalid prefix (max 5 characters)",
+  "set_prefix": "set prefix '{}'"
 }

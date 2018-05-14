@@ -1,5 +1,7 @@
 {
-"list_of_locales" : "Liste aller verfügbarer Sprachen",
-"set_locale" : "Sprache '{}' eingestellt",
-"locale_not_found" : "Sprache '{}' nicht gefunden"
+  "list_of_locales" : "Liste aller verfügbarer Sprachen",
+  "set_locale" : "Sprache '{}' eingestellt",
+  "locale_not_found": "Sprache '{}' nicht gefunden",
+  "invalid_prefix": "Ungültiges Prefix (maximal 5 Zeichen)",
+  "set_prefix" : "Prefix '{}' gesetzt"
 }

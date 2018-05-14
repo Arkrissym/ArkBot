@@ -31,8 +31,19 @@ from logger import logger
 import config
 import dataBase
 
+async def guild_prefix(bot, message):
+	r=list()
+	if message.guild != None:
+		r.extend([config.getPrefix(message.guild.id)])
+	else:
+		r.extend([config.config['bot']['cmd_prefix']])
+	r.extend(commands.when_mentioned(bot, message))
+
+	return r
+
 #bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
-bot=commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
+#bot=commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
+bot=commands.AutoShardedBot(command_prefix=guild_prefix)
 
 @bot.event
 async def on_ready():
@@ -44,32 +55,37 @@ async def on_ready():
 async def on_disconnect():
 	bot.connect()
 
-@bot.event
-async def on_message(message):
-#	check, if message has been sent by this bot or another bot
-	if message.author == bot.user or message.author.bot:
-		return
+#@bot.event
+#async def on_message(message):
+	#check, if message has been sent by this bot or another bot
+#	if message.author == bot.user or message.author.bot:
+#		return
 
-	if len(message.content) > 1:
-		cmd=bot.get_command(message.content[len(config.config['bot']['cmd_prefix']):])
-		if cmd:
-			try:
-				logger.info('command ' + cmd.name + ' called.')
-				await bot.process_commands(message)
+#	cmd=None
 
-				if hasattr(message.channel, 'server'):
-					prefix='messages/' + str(message.channel.server) + '/' + str(message.channel) + '/' + message.author.name
-				else:
-					prefix='messages/' + message.author.name
+#	if (message.guild != None) and message.content.startswith(config.getPrefix(message.guild.id)):
+#		cmd=bot.get_command(message.content[len(config.getPrefix(message.guild.id)):])
+#	elif message.content.startswith(config.config['bot']['cmd_prefix']):
+#		cmd=bot.get_command(message.content[len(config.config['bot']['cmd_prefix']):])
 
-				n=dataBase.readVal(prefix, cmd.name)
-				dataBase.writeVal(prefix, cmd.name, n+1)
-			except Exception as e:
-				logger.error('User ' + message.author.name + ' has sent ' + message.content + ' and caused exception: ' + str(e))
+#	if cmd:
+#		try:
+#			logger.info('command ' + cmd.name + ' called.')
+#			await bot.process_commands(message)
+
+#			if hasattr(message.channel, 'server'):
+#				prefix='messages/' + str(message.channel.server) + '/' + str(message.channel) + '/' + message.author.name
+#			else:
+#				prefix='messages/' + message.author.name
+
+#			n=dataBase.readVal(prefix, cmd.name)
+#			dataBase.writeVal(prefix, cmd.name, n+1)
+#		except Exception as e:
+#			logger.error('User ' + message.author.name + ' has sent ' + message.content + ' and caused exception: ' + str(e))
 
 @bot.event
 async def on_member_join(member):
-	Msg=config.strings['bot']['member_join_msg']
+	Msg=config.strings[config.getLocale(member.guild.id)]['bot']['member_join_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
 	if not ch:
@@ -80,7 +96,7 @@ async def on_member_join(member):
 
 @bot.event
 async def on_member_remove(member):
-	Msg=config.strings['bot']['member_remove_msg']
+	Msg=config.strings[config.getLocale(member.guild.id)]['bot']['member_remove_msg']
 	msg=random.randint(0, len(Msg) - 1)
 	ch=member.guild.system_channel
 	if not ch:
@@ -96,7 +112,7 @@ async def on_member_ban(guild, user):
 		for ch in guild.text_channels:
 			break
 
-	await ch.send(config.strings['bot']['member_ban_msg'].format(user.name))
+	await ch.send(config.strings[config.getLocale(guild.id)]['bot']['member_ban_msg'].format(user.name))
 
 @bot.event
 async def on_member_unban(guild, user):
@@ -105,7 +121,7 @@ async def on_member_unban(guild, user):
 		for ch in guild.text_channels:
 			break
 
-	await ch.send(config.strings['bot']['member_unban_msg'].format(user.name))
+	await ch.send(config.strings[config.getLocale(guild.id)]['bot']['member_unban_msg'].format(user.name))
 
 
 for ext in config.config['bot']['extensions'].split():

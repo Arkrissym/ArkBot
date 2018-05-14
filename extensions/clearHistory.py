@@ -38,8 +38,8 @@ class ClearHistory:
 		async for log in ctx.message.channel.history(limit=None, after=datetime.utcfromtimestamp(time.time()-86400)):
 			if log.author == self.bot.user:
 				msgs.append(log)
-			elif len(log.content) > 1 and log.content.startswith(config.config['bot']['cmd_prefix']):
-				if self.bot.get_command(log.content[len(config.config['bot']['cmd_prefix']):]):
+			elif len(log.content) > 1 and log.content.startswith(config.getPrefix(ctx.guild_id.id)):
+				if self.bot.get_command(log.content[len(config.getPrefix(ctx.guild_id.id)):]):
 					msgs.append(log)
 
 		await ctx.message.channel.delete_messages(msgs)
