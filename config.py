@@ -152,10 +152,10 @@ def getLocale(guild_id):
 	try:
 		data=sqlReadConfig(guild_id)
 	except:
-		return config['bot']['cmd_prefix']
+		return config['bot']['locale']
 
 	if data == None:
-		return config['bot']['cmd_prefix']
+		return config['bot']['locale']
 
 	return data[2]
 

@@ -4,5 +4,5 @@ youtube_dl
 googletrans
 pycountry
 babel
-psycopg2
+psycopg2-binary
 aiohttp>=2.3.0
