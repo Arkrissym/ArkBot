@@ -28,18 +28,18 @@ import asyncio
 import config
 
 class ClearHistory:
-	def __init__(self, bot):
-		self.bot=bot
-
 	@commands.command(pass_context=True, no_pm=True)
 	@commands.has_permissions(manage_messages=True)
 	async def clearlog(self, ctx):
+		prefix=config.getPrefix(ctx.guild.id)
+		prefix_len=len(prefix)
+
 		msgs=[]
 		async for log in ctx.message.channel.history(limit=None, after=datetime.utcfromtimestamp(time.time()-86400)):
-			if log.author == self.bot.user:
+			if log.author == ctx.bot.user:
 				msgs.append(log)
-			elif len(log.content) > 1 and log.content.startswith(config.getPrefix(ctx.guild_id.id)):
-				if self.bot.get_command(log.content[len(config.getPrefix(ctx.guild_id.id)):]):
+			elif len(log.content) > 1 and log.content.startswith(prefix):
+				if ctx.bot.get_command(log.content[prefix_len:]):
 					msgs.append(log)
 
 		await ctx.message.channel.delete_messages(msgs)
@@ -51,4 +51,4 @@ class ClearHistory:
 			await log.delete()
 
 def setup(bot):
-	bot.add_cog(ClearHistory(bot))
+	bot.add_cog(ClearHistory())

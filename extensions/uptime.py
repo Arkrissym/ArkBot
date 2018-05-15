@@ -25,13 +25,14 @@ import time
 import config
 
 class Uptime:
-	def __init__(self, bot):
-		self.bot=bot
+	def __init__(self):
 		self.startTime=time.time()
 
 	@commands.command(pass_context=True)
 	async def uptime(self, ctx):
-		answer=config.strings[config.getLocale(ctx.guild.id)]['uptime']['uptime_answer']
+		locale=config.getLocale(ctx.guild.id)
+
+		answer=config.strings[locale]['uptime']['uptime_answer']
 		uptime=time.time() - self.startTime
 
 		days=0
@@ -43,9 +44,9 @@ class Uptime:
 			days=int(days)
 			uptime-=days * 86400
 			if days == 1:
-				answer=answer + str(days) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['day']
+				answer=answer + str(days) + config.strings[locale]['uptime']['day']
 			else:
-				answer=answer + str(days) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['days']
+				answer=answer + str(days) + config.strings[locale]['uptime']['days']
 		if uptime > 3600:
 			hours=uptime / 3600
 			hours=int(hours)
@@ -53,9 +54,9 @@ class Uptime:
 			if days > 0:
 				answer=answer + ', '
 			if hours == 1:
-				answer=answer + str(hours) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['hour']
+				answer=answer + str(hours) + config.strings[locale]['uptime']['hour']
 			else:
-				answer=answer + str(hours) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['hours']
+				answer=answer + str(hours) + config.strings[locale]['uptime']['hours']
 		if uptime > 60:
 			mins=uptime / 60
 			mins=int(mins)
@@ -63,21 +64,21 @@ class Uptime:
 			if days > 0 or hours > 0:
 				answer=answer + ', '
 			if mins == 1:
-				answer=answer + str(mins) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['min']
+				answer=answer + str(mins) + config.strings[locale]['uptime']['min']
 			else:
-				answer=answer + str(mins) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['mins']
+				answer=answer + str(mins) + config.strings[locale]['uptime']['mins']
 
 		if (days > 0 or hours > 0 or mins > 0) and (uptime > 0):
 			answer=answer + ', '
 		uptime=int(uptime)
 		if uptime == 1:
-			answer=answer + str(uptime) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['sec']
+			answer=answer + str(uptime) + config.strings[locale]['uptime']['sec']
 		elif uptime > 1:
-			answer=answer + str(uptime) + config.strings[config.getLocale(ctx.guild.id)]['uptime']['secs']
+			answer=answer + str(uptime) + config.strings[locale]['uptime']['secs']
 
 		answer=answer + '.'
 
 		await ctx.send(answer)
 
 def setup(bot):
-	bot.add_cog(Uptime(bot))
+	bot.add_cog(Uptime())

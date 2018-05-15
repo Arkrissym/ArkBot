@@ -23,8 +23,7 @@
 from discord.ext import commands
 
 class faq:
-	def __init__(self, bot):
-		self.bot=bot
+	def __init__(self):
 		self.faqs=[]
 
 		file=open('faq.txt', 'r')
@@ -49,4 +48,4 @@ class faq:
 				return
 
 def setup(bot):
-	bot.add_cog(faq(bot))
+	bot.add_cog(faq())

@@ -34,8 +34,7 @@ import config
 from logger import logger as log
 
 class LeagueOfLegends:
-	def __init__(self, bot):
-		self.bot=bot
+	def __init__(self):
 		self.lastrun=time.time()
 
 		try:
@@ -49,7 +48,6 @@ class LeagueOfLegends:
 				log.error("No Riot Key found. Please save a riotKey.txt or specify a environment variable 'RIOT_KEY'.")
 
 		self.allowed_locales=self.getData("/lol/static-data/v3/languages")["data"]
-		#print(self.allowed_locales)
 
 	def getData(self, name):
 		fetchtime=dataBase.readVal('lolStat/' + name.lower(), 'fetchtime')
@@ -74,7 +72,6 @@ class LeagueOfLegends:
 			req.add_header('X-Riot-Token', self.key)
 			try:
 				url=urllib.request.urlopen(req)
-#				self.lastrun=time.time()
 			except urllib.error.HTTPError as e:
 				if e.code == 429:
 					self.lastrun=time.time() + int(e.headers['Retry-After'])
@@ -105,8 +102,10 @@ class LeagueOfLegends:
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
 
-		data=self.getData('lol/summoner/v3/summoners/by-name/' + summoner)
-		versions=self.getData('lol/static-data/v3/versions')
+		data=await ctx.bot.loop.run_in_executor(None, self.getData, str('lol/summoner/v3/summoners/by-name/' + summoner))
+		versions=await ctx.bot.loop.run_in_executor(None, self.getData, 'lol/static-data/v3/versions')
+
+		locale=config.getLocale(ctx.guild.id)
 
 		if data != None:
 			level=data['summonerLevel']
@@ -117,40 +116,40 @@ class LeagueOfLegends:
 			embed=discord.Embed(title=summoner)
 			embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/profileicon/{}.png'.format(version, icon_id))
 
-			embed.add_field(name=config.strings[config.getLocale(ctx.guild.id)]['lolStat']['playerInfo_level'], value=level)
+			embed.add_field(name=config.strings[locale]['lolStat']['playerInfo_level'], value=level)
 
 			league=self.getData('lol/league/v3/positions/by-summoner/{}'.format(data['id']))
 			if league != None:
 				for l in league['data']:
-					embed.add_field(name=config.strings[config.getLocale(ctx.guild.id)]['lolStat']['playerInfo_rank'], value='{} {}'.format(l['tier'], l['rank']))
+					embed.add_field(name=config.strings[locale]['lolStat']['playerInfo_rank'], value='{} {}'.format(l['tier'], l['rank']))
 
 			await ctx.send(embed=embed)
 		else:
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['lolStat']['lstatlevel_fail'])
+			await ctx.send(config.strings[locale]['lolStat']['lstatlevel_fail'])
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def getChampionRotation(self, ctx):
-		data=self.getData("lol/platform/v3/champions?freeToPlay=true")
-		#allChampionData=self.getData("lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(config.config["bot"]["locale"]))
-		if config.getLocale(ctx.guild.id) in self.allowed_locales:
-			allChampionData=self.getData("lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(config.getLocale(ctx.guild.id)))
-		else:
-			allChampionData=self.getData("lol/static-data/v3/champions?&champListData=all&tags=all&dataById=true")
+		data=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/platform/v3/champions?freeToPlay=true")
 
-		embed=discord.Embed(title=config.strings[config.getLocale(ctx.guild.id)]["lolStat"]["championRotationTitle"])
+		locale=config.getLocale(ctx.guild.id)
+
+		if locale in self.allowed_locales:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(locale))
+		else:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?&champListData=all&tags=all&dataById=true")
+
+		embed=discord.Embed(title=config.strings[locale]["lolStat"]["championRotationTitle"])
 
 		for champion in data["champions"]:
 			championData=allChampionData["data"]["{}".format(champion["id"])]
 
-			#print(championData["name"])
-			tags=config.strings[config.getLocale(ctx.guild.id)]["lolStat"][championData["tags"][0]]
+			tags=config.strings[locale]["lolStat"][championData["tags"][0]]
 			for i in range(1, len(championData["tags"])):
-				#print(config.strings["lolStat"][tag])
-				tags="{}, {}".format(tags, config.strings[config.getLocale(ctx.guild.id)]["lolStat"][championData["tags"][i]])
+				tags="{}, {}".format(tags, config.strings[locale]["lolStat"][championData["tags"][i]])
 			
 			embed.add_field(name=championData["name"], value=tags)
 
 		await ctx.send(embed=embed)
 
 def setup(bot):
-	bot.add_cog(LeagueOfLegends(bot))
+	bot.add_cog(LeagueOfLegends())

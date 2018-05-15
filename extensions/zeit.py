@@ -25,23 +25,21 @@ import random
 import config
 
 class Time:
-	def __init__(self, bot):
-		self.bot=bot
-
 	@commands.command(pass_context=True)
 	async def time(self, ctx):
 		list=config.strings[config.getLocale(ctx.guild.id)]['zeit']['time_answers']
-		await ctx.send(list[random.randint(0, len(self.list) - 1)])
+		await ctx.send(list[random.randint(0, len(list) - 1)])
 
 	async def on_message(self, message):
 		if message.guild:
-			list=config.strings[config.getLocale(message.guild.id)]['zeit']['time_answers']
-			triggers=config.strings[config.getLocale(message.guild.id)]['zeit']['time_triggers']
+			locale=config.getLocale(message.guild.id)
+			list=config.strings[locale]['zeit']['time_answers']
+			triggers=config.strings[locale]['zeit']['time_triggers']
 			
 			for trig in triggers:
 				if message.content == trig:
-					await message.channel.send(list[random.randint(0, len(self.list) - 1)])
+					await message.channel.send(list[random.randint(0, len(list) - 1)])
 
 
 def setup(bot):
-	bot.add_cog(Time(bot))
+	bot.add_cog(Time())

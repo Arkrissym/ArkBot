@@ -39,15 +39,12 @@ guild_config={}
 def load_locales():
 	try:
 		for locale in os.listdir('{}/locales/'.format(os.path.dirname(__file__))):
-			#print(locale)
 			strings.update({locale : {}})
 			#load default strings first
 			try:
 				for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), "default")):
-					#print(file)
 					if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file)) and file.endswith('.json'):
 						try:
-						#with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file), 'r', encoding='utf-8') as str_file:
 							str_file = open('{}/locales/{}/{}'.format(os.path.dirname(__file__), "default", file), 'r', encoding='utf-8')
 							strings[locale][file[:-5]]=json.load(str_file)
 							str_file.close()
@@ -60,17 +57,13 @@ def load_locales():
 			for file in os.listdir('{}/locales/{}'.format(os.path.dirname(__file__), locale)):
 				if os.path.isfile('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file)) and file.endswith('.json'):
 					try:
-						#with open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8') as str_file:
 						str_file = open('{}/locales/{}/{}'.format(os.path.dirname(__file__), locale, file), 'r', encoding='utf-8')
 						data=json.load(str_file)
 						for key in data.keys():
 							strings[locale][file[:-5]][key]=data[key]
-						#strings[locale][file[:-5]]=json.load(str_file)
 						str_file.close()
 					except Exception as e:
 						log.warning('{}: failed to open {}: {}'.format(locale, file, str(e)))
-
-		#print(strings)
 	except Exception as e:
 		log.error('failed to load strings: {}'.format(str(e)))
 
@@ -88,21 +81,15 @@ if _initialized == False:
 
 
 def sqlReadConfig(id):
-	#print(guild_config)
-	for guild_id in guild_config.keys():
-		if guild_id == str(id):
-			return [id, guild_config[guild_id]["prefix"], guild_config[guild_id]["locale"]]
+	if str(id) in guild_config.keys():
+		return [id, guild_config[guild_id]["prefix"], guild_config[guild_id]["locale"]]
 
 	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
-	#cur.execute("SELECT * FROM config")
 	cur.execute(sql.SQL("SELECT * FROM config WHERE id = %s"), [str(id)])
 
 	ret = None
-	#count = 0
 	for row in cur:
-		#print("row " + str(count) + ": " + row[0] + " | " + row[1] + " | " + row[2])
-		#count += 1
 		if row[0] == str(id):
 			ret = row
 			guild_config[str(id)]={
@@ -165,7 +152,6 @@ class Config:
 		self.bot=bot
 
 	@commands.command(pass_context=True, no_pm=True)
-	#@commands.is_owner()
 	@commands.has_permissions(administrator=True)
 	async def list_locales(self, ctx):
 		text=str()
@@ -177,7 +163,6 @@ class Config:
 		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
-	#@commands.is_owner()
 	@commands.has_permissions(administrator=True)
 	async def set_locale(self, ctx, *, locale : str):
 		locale_avail=False
@@ -194,7 +179,6 @@ class Config:
 			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['locale_not_found'].format(locale))
 
 	@commands.command(pass_context=True, no_pm=True)
-	#@commands.is_owner()
 	@commands.has_permissions(administrator=True)
 	async def set_prefix(self, ctx, prefix : str):
 		if len(prefix) == 0 or len(prefix) > 5 or prefix.startswith("@") or prefix.startswith("#"):

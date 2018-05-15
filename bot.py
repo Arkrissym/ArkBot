@@ -41,8 +41,6 @@ async def guild_prefix(bot, message):
 
 	return r
 
-#bot=commands.Bot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
-#bot=commands.AutoShardedBot(command_prefix=commands.when_mentioned_or(config.config['bot']['cmd_prefix']))
 bot=commands.AutoShardedBot(command_prefix=guild_prefix)
 
 @bot.event
@@ -58,34 +56,6 @@ async def on_ready():
 @bot.event
 async def on_disconnect():
 	bot.connect()
-
-#@bot.event
-#async def on_message(message):
-	#check, if message has been sent by this bot or another bot
-#	if message.author == bot.user or message.author.bot:
-#		return
-
-#	cmd=None
-
-#	if (message.guild != None) and message.content.startswith(config.getPrefix(message.guild.id)):
-#		cmd=bot.get_command(message.content[len(config.getPrefix(message.guild.id)):])
-#	elif message.content.startswith(config.config['bot']['cmd_prefix']):
-#		cmd=bot.get_command(message.content[len(config.config['bot']['cmd_prefix']):])
-
-#	if cmd:
-#		try:
-#			logger.info('command ' + cmd.name + ' called.')
-#			await bot.process_commands(message)
-
-#			if hasattr(message.channel, 'server'):
-#				prefix='messages/' + str(message.channel.server) + '/' + str(message.channel) + '/' + message.author.name
-#			else:
-#				prefix='messages/' + message.author.name
-
-#			n=dataBase.readVal(prefix, cmd.name)
-#			dataBase.writeVal(prefix, cmd.name, n+1)
-#		except Exception as e:
-#			logger.error('User ' + message.author.name + ' has sent ' + message.content + ' and caused exception: ' + str(e))
 
 @bot.event
 async def on_member_join(member):

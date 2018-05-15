@@ -25,12 +25,11 @@ import discord
 import asyncio
 import random
 from faker import Faker
+from faker.config import AVAILABLE_LOCALES
 import config
 
 class Nickname:
-	def __init__(self, bot):
-		self.bot=bot
-		#self.nameList=[
+		#nameList=[
 		#	'Noname',
 		#	'Alphakevin',
 		#	'Chantal',
@@ -46,8 +45,6 @@ class Nickname:
 		#	'Hans Jörg'
 		#]
 
-		#self.fake=Faker(config.config['nickName']['Faker_locale'])
-
 	#@commands.command(pass_context=True, hidden=True, no_pm=True)
 	#async def yourmom(self, ctx):
 	#	oldName=ctx.author.nick
@@ -61,7 +58,11 @@ class Nickname:
 		#if random.randint(0, 2) < 1:
 		#	await ctx.author.edit(nick=self.nameList[random.randint(0, len(nameList) - 1)])
 		#else:
-		await ctx.author.edit(nick=Faker(config.getLocale(ctx.guild.id)).name())
+		locale=config.getLocale(ctx.guild.id)
+		if locale in AVAILABLE_LOCALES:
+			await ctx.author.edit(nick=Faker(locale).name())
+		else:
+			await ctx.author.edit(nick=Faker().name())
 
 	@commands.command(pass_context=True, no_pm=True)
 #	@commands.has_permissions(change_nickname=True)
@@ -76,4 +77,4 @@ class Nickname:
 		await ctx.author.edit(nick=config.strings[config.getLocale(ctx.guild.id)]['nickName']['idiot'])
 
 def setup(bot):
-	bot.add_cog(Nickname(bot))
+	bot.add_cog(Nickname())

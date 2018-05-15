@@ -6,12 +6,8 @@ import pycountry
 from babel import Locale
 
 class Translator:
-	def __init__(self, bot):
-		self.bot=bot
-
 	async def on_reaction_add(self, reaction, user):
 		if isinstance(reaction.emoji, discord.Emoji):
-			#print("discord.Emoji")
 			name=reaction.emoji.name
 		else:
 			name=reaction.emoji
@@ -34,7 +30,6 @@ class Translator:
 		#get language
 		locale=str(Locale.parse('und_{}'.format(name)))
 		locale=locale[:2]
-		#print(locale)
 
 		#translate
 		translation=googletrans.Translator().translate(reaction.message.content, dest=locale).text
@@ -44,4 +39,4 @@ class Translator:
 			pass
 
 def setup(bot):
-	bot.add_cog(Translator(bot))
+	bot.add_cog(Translator())
