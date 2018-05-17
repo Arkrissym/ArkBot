@@ -82,7 +82,7 @@ if _initialized == False:
 
 def sqlReadConfig(id):
 	if str(id) in guild_config.keys():
-		return [id, guild_config[guild_id]["prefix"], guild_config[guild_id]["locale"]]
+		return [id, guild_config[str(id)]["prefix"], guild_config[str(id)]["locale"]]
 
 	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
