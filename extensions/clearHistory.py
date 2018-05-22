@@ -36,13 +36,18 @@ class ClearHistory:
 
 		msgs=[]
 		async for log in ctx.message.channel.history(limit=None, after=datetime.utcfromtimestamp(time.time()-86400)):
+			if len(msgs) == 100:
+				await ctx.message.channel.delete_messages(msgs)
+				msgs.clear()
+
 			if log.author == ctx.bot.user:
 				msgs.append(log)
 			elif len(log.content) > 1 and log.content.startswith(prefix):
 				if ctx.bot.get_command(log.content[prefix_len:]):
 					msgs.append(log)
 
-		await ctx.message.channel.delete_messages(msgs)
+		if len(msgs) > 0:
+			await ctx.message.channel.delete_messages(msgs)
 
 	@commands.command(pass_context=True, no_pm=True, description='tabularasa protocol')
 	@commands.has_permissions(administrator=True)
