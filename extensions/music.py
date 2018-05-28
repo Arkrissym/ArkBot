@@ -40,11 +40,10 @@ if not discord.opus.is_loaded():
 	try:
 		discord.opus.load_opus('opus')
 	except:
-		log.error("music - Cannot load opus.")
-#		try:
-#			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
-#		except:
-#			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
+		try:
+			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
+		except:
+			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
 		
 _config={}
 
