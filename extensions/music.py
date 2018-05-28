@@ -492,10 +492,9 @@ class Music:
 		previous=voice_state.previous_song
 		current=voice_state.current_song
 		if previous is not None:
-			loop=False
-			if voice_state.loop == True:
-				loop=True
-				voice_state.loop=False
+			loop=getLoopMode(ctx.guild.id)
+			if loop == "on":
+				setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), "off")
 
 				if len(voice_state.songs) > 0 and voice_state.songs[len(voice_state.songs)-1] == previous:
 					voice_state.songs.pop()
@@ -509,7 +508,8 @@ class Music:
 			while current == voice_state.current_song:
 				await asyncio.sleep(0.1)
 
-			voice_state.loop=loop
+			if loop == "on":
+				setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), "on")
 
 			locale=config.getLocale(ctx.guild.id)
 
