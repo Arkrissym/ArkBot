@@ -31,6 +31,7 @@ import subprocess
 import shlex
 import collections
 import random
+import psycopg2
 
 import config
 from logger import logger as log
@@ -39,11 +40,80 @@ if not discord.opus.is_loaded():
 	try:
 		discord.opus.load_opus('opus')
 	except:
-		try:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
-		except:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
-			
+		log.error("music - Cannot load opus.")
+#		try:
+#			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
+#		except:
+#			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
+		
+_config={}
+
+def getConfig(id):
+	if str(id) in _config.keys():
+		return [id, _config[str(id)]["queue_mode"], _config[str(id)]["loop"]]
+
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+	cur.execute(sql.SQL("SELECT * FROM music_config WHERE id = %s"), [str(id)])
+
+	ret = None
+	for row in cur:
+		if row[0] == str(id):
+			ret = row
+			_config[str(id)]={
+				"queue_mode" : ret[1],
+				"loop" : ret[2]
+				}
+
+	cur.close()
+	conn.close()
+
+	return ret
+
+def setConfig(id, queue_mode, loop):
+	try:
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		cur=conn.cursor()
+
+		old = sqlReadConfig(id)
+		if old == None:
+			cur.execute(sql.SQL("INSERT INTO music_config VALUES (%s, %s, %s)"), [str(id), queue_mode, loop])
+		else:
+			cur.execute(sql.SQL("UPDATE music_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(id), queue_mode, str(id)])	
+	
+		conn.commit()
+
+		cur.close()
+		conn.close()
+	except:
+		pass
+
+	_config[str(id)]={
+		"queue_mode" : queue_mode,
+		"loop" : loop
+		}
+
+def getQueueMode(id):
+	try:
+		data=getConfig(id)
+	except:
+		return "normal"
+
+	if data != None:
+		return data[1]
+
+	return "normal"
+
+def getLoopMode(id):
+	try:
+		data=getConfig(id)
+	except:
+		return "off"
+
+	if data != None:
+		return data[2]
+
+	return "off"
 
 class VoiceEntry:
 	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader):
@@ -61,8 +131,8 @@ class VoiceState:
 		self.previous_song=None
 		self.voice_client=None
 		self.voice_channel=None
-		self.loop=False
-		self.queue_mode="normal"
+		#self.loop=False
+		#self.queue_mode="normal"
 		#self.songs=asyncio.Queue(maxsize=1000)
 		self.songs=collections.deque(maxlen=1000)
 		self.play_next_song=asyncio.Event()
@@ -102,7 +172,7 @@ class VoiceState:
 						wait=False
 				await asyncio.sleep(1.0)
 
-			if self.loop == True and self.previous_song != None:
+			if getLoopMode(self.voice_channel.guild.id) == "on" and self.previous_song != None:
 				#await self.songs.put(self.previous_song)
 				self.songs.append(self.previous_song)
 
@@ -119,6 +189,10 @@ class Music:
 	def __init__(self, bot):
 		self.bot=bot
 		self.voice_states={}
+
+		#fetch config from database
+		for g in bot.guilds:
+			getConfig(g.id)
 
 	def get_voice_state(self, server):
 		state=self.voice_states.get(server.id)
@@ -174,7 +248,6 @@ class Music:
 	async def play(self, ctx, song_name):
 		voice_state=self.get_voice_state(ctx.message.guild)
 
-		#if voice_state.songs.full():
 		if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_full'])
 			return None
@@ -213,8 +286,8 @@ class Music:
 			uploader='Unknown'
 
 		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
-		#await voice_state.songs.put(entry)
-		if voice_state.queue_mode == 'random' and len(voice_state.songs) > 1:
+
+		if getQueueMode(ctx.guild.id) == 'random' and len(voice_state.songs) > 1:
 			voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), entry)
 		else:
 			voice_state.songs.append(entry)
@@ -256,26 +329,20 @@ class Music:
 		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)#, description=config.strings[config.getLocale(ctx.guild.id)]['music']['playytlist_description'])
-	#async def playytlist(self, ctx, mode : str, *, playlist_link : str):
 	async def playytlist(self, ctx, *, playlist_link : str):
 		locale=config.getLocale(ctx.guild.id)
 
 		voice_state=self.get_voice_state(ctx.message.guild)
 
-		#if voice_state.songs.full():
 		if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
 			await ctx.send(config.strings[locale]['music']['queue_full'])
 			return
 
-		if voice_state.queue_mode == 'random':
+		queue_mode=getQueueMode(ctx.guild.id)
+		if queue_mode == 'random':
 			_random=True
-		#	reverse=False
-		#elif mode == 'reverse':
-		#	random=False
-		#	reverse=True
 		else:
 			_random=False
-		#	reverse=False
 
 		ytdl_opts={
 			'format': 'webm[abr>0]/bestaudio/best',
@@ -284,7 +351,6 @@ class Music:
 			'yesplaylist': True,
 			'quiet': True,
 			'playlistrandom' : _random,
-		#	'playlistreverse' : reverse,
 			'ignoreerrors' : True,
 			'logger' : log
 		}
@@ -332,14 +398,13 @@ class Music:
 				else:
 					uploader=None
 
-				#if voice_state.songs.full():
 				if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
 					await ctx.send(config.strings[locale]['music']['queue_full'])
 					return
 
 				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
-				#await voice_state.songs.put(song_entry)
-				if voice_state.queue_mode == 'random' and len(voice_state.songs) > 1:
+
+				if queue_mode == 'random' and len(voice_state.songs) > 1:
 					voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), song_entry)
 				else:
 					voice_state.songs.append(song_entry)
@@ -389,35 +454,34 @@ class Music:
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def loop(self, ctx, mode : str=None):
-		voice_state=self.get_voice_state(ctx.message.guild)
-		
+		if mode:
+			mode=mode.lower()
+
 		if mode == 'on':
-			voice_state.loop=True
+			setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), mode)
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_on'])
 		elif mode == 'off':
-			voice_state.loop=False
+			setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), mode)
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_off'])
 		elif mode == None:
-			if voice_state.loop == True:
+			if getLoopMode(ctx.guild.id) == "on":
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_on'])
 			else:
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_off'])
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def queue_mode(self, ctx, mode : str=None):
-		voice_state=self.get_voice_state(ctx.message.guild)
-		
 		if mode:
 			mode=mode.lower()
 
 		if mode == 'normal':
-			voice_state.queue_mode=mode
+			setConfig(ctx.guild.id, mode, getLoopMode(ctx.guild.id))
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_normal'])
 		elif mode == 'random':
-			voice_state.queue_mode=mode
+			setConfig(ctx.guild.id, mode, getLoopMode(ctx.guild.id))
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_random'])
 		elif mode == None:
-			if voice_state.queue_mode == 'normal':
+			if getQueueMode(ctx.guild.id) == 'normal':
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_normal'])
 			else:
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_random'])
@@ -437,7 +501,6 @@ class Music:
 				if len(voice_state.songs) > 0 and voice_state.songs[len(voice_state.songs)-1] == previous:
 					voice_state.songs.pop()
 
-			#await voice_state.songs.put(previous)
 			if current:
 				voice_state.songs.appendleft(current)
 			voice_state.songs.appendleft(previous)
@@ -464,10 +527,6 @@ class Music:
 
 		for t in voice_state.songs:
 			await songs.put(t)
-		#for t in range(0, voice_state.songs.qsize()):
-		#	tmp=await voice_state.songs.get()
-		#	await voice_state.songs.put(tmp)
-		#	await songs.put(tmp)
 
 		locale=config.getLocale(ctx.guild.id)
 
