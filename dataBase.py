@@ -24,20 +24,33 @@ import json
 import pathlib
 import os
 
+from logger import logger as log
+
 def dump(prefix):
 	filename='dataBase/' + prefix + '.json'
+	filename=filename.replace("&", "_")
+	filename=filename.replace("=", "_")
+	filename=filename.replace("?", "_")
+
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
 		with open(filename, 'r', encoding='utf-8') as file:
 			data=json.load(file)
 			return data
-	except:
+	except FileNotFoundError:
+		return {}
+	except Exception as e:
+		log.error("dataBase - Cannot read (dump) data: " + str(e))
 		return {}
 	return {}
 
 def readVal(prefix, valName):
 	filename='dataBase/' + prefix + '.json'
+	filename=filename.replace("&", "_")
+	filename=filename.replace("=", "_")
+	filename=filename.replace("?", "_")
+	
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
@@ -46,12 +59,19 @@ def readVal(prefix, valName):
 			for key in data.keys():
 				if key == valName:
 					return data[valName]
-	except:
+	except FileNotFoundError:
+		return 0
+	except Exception as e:
+		log.error("dataBase - Cannot read data: " + str(e))
 		return 0
 	return 0
 
 def writeVal(prefix, valName, val):
 	filename='dataBase/' + prefix + '.json'
+	filename=filename.replace("&", "_")
+	filename=filename.replace("=", "_")
+	filename=filename.replace("?", "_")
+	
 	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 	try:
@@ -69,5 +89,6 @@ def writeVal(prefix, valName, val):
 			data.update({valName : val})
 			json.dump(data, file)
 			return 1
-	except:
+	except Exception as e:
+		log.error("dataBase - Cannot write data: " + str(e))
 		return 0

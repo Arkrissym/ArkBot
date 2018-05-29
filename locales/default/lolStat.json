@@ -1,7 +1,7 @@
 {
 	"playerInfo_level": "level:",
 	"playerInfo_rank": "rank:",
-	"playerInfo_fail": "Failed to retrieve player information.",
+	"lolStat_fail": "Failed to retrieve required information. Please try again later.",
 	"championRotationTitle": "Current champion rotation",
 	"Assassin": "Assassin",
 	"Fighter": "Fighter",

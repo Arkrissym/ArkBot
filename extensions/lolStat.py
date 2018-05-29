@@ -75,7 +75,7 @@ class LeagueOfLegends:
 			except urllib.error.HTTPError as e:
 				if e.code == 429:
 					self.lastrun=time.time() + int(e.headers['Retry-After'])
-					log.info('lolStat.getData: got 429: timeout. searching for cached results')
+					log.info('lolStat.getData: got 429: rety after {} seconds. searching for cached results'.format(int(e.headers['Retry-After'])))
 					data=dataBase.dump('lolStat/' + name.lower())
 					if data == {}:
 						return None
@@ -89,9 +89,19 @@ class LeagueOfLegends:
 
 				if isinstance(data, list):
 					data={'data' : data}
-				for keyName in data.keys():
-					dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
-				dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
+				#for keyName in data.keys():
+				#	dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
+				#dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
+
+				data.update({"fetchtime" : time.time()})
+				
+				filename='dataBase/' + "lolStat/" + name + '.json'
+				filename=filename.replace("&", "_")
+				filename=filename.replace("=", "_")
+				filename=filename.replace("?", "_")
+
+				with open(filename, 'w', encoding='utf-8') as file:
+					json.dump(data, file)
 
 				return data
 
@@ -125,7 +135,7 @@ class LeagueOfLegends:
 
 			await ctx.send(embed=embed)
 		else:
-			await ctx.send(config.strings[locale]['lolStat']['lstatlevel_fail'])
+			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def getChampionRotation(self, ctx):
@@ -150,6 +160,29 @@ class LeagueOfLegends:
 			embed.add_field(name=championData["name"], value=tags)
 
 		await ctx.send(embed=embed)
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def getChampionLore(self, ctx, championName : str):
+		locale=config.getLocale(ctx.guild.id)
+
+		if locale in self.allowed_locales:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(locale))
+		else:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?&champListData=all&tags=all&dataById=true")
+
+		if allChampionData != None:
+			version=allChampionData["version"]
+
+			for championKey in allChampionData["keys"]:
+				championData=allChampionData["data"][str(championKey)]
+				if championData["name"].lower() == championName.lower():
+					embed=discord.Embed(title=championData["name"])
+					embed.add_field(name=championData["title"], value=championData["lore"])
+					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
+					await ctx.send(embed=embed)
+					return
+		else:
+			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
 def setup(bot):
 	bot.add_cog(LeagueOfLegends())

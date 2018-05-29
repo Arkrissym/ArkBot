@@ -1,7 +1,7 @@
 {
 	"playerInfo_level": "Level:",
 	"playerInfo_rank": "Rang:",
-	"playerInfo_fail": "Fehler beim abrufen der Informationen.",
+	"lolStat_fail": "Fehler beim abrufen der Informationen. Bitte versuche es später erneut",
 	"championRotationTitle": "Aktuelle Championrotation",
 	"Assassin": "Assassine",
 	"Fighter": "Kämpfer",

@@ -103,19 +103,22 @@ def sqlReadConfig(id):
 	return ret
 
 def sqlSaveConfig(id, prefix, locale):
-	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
-	cur=conn.cursor()
+	try:
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		cur=conn.cursor()
 
-	old = sqlReadConfig(id)
-	if old == None:
-		cur.execute(sql.SQL("INSERT INTO config VALUES (%s, %s, %s)"), [str(id), prefix, locale])
-	else:
-		cur.execute(sql.SQL("UPDATE config SET id = %s, prefix = %s, locale = %s WHERE id = %s"), [str(id), prefix, locale, str(id)])	
+		old = sqlReadConfig(id)
+		if old == None:
+			cur.execute(sql.SQL("INSERT INTO config VALUES (%s, %s, %s)"), [str(id), prefix, locale])
+		else:
+			cur.execute(sql.SQL("UPDATE config SET id = %s, prefix = %s, locale = %s WHERE id = %s"), [str(id), prefix, locale, str(id)])	
 	
-	conn.commit()
+		conn.commit()
 
-	cur.close()
-	conn.close()
+		cur.close()
+		conn.close()
+	except:
+		pass
 
 	guild_config[str(id)]={
 		"prefix" : prefix,
