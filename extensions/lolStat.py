@@ -35,7 +35,24 @@ from logger import logger as log
 
 class LeagueOfLegends:
 	def __init__(self):
-		self.lastrun=time.time()
+		self.retry_after={
+				"static-data" : time.time(),
+				"summoner" : time.time(),
+				"league" : time.time(),
+				"match" : time.time(),
+				"champion" : time.time(),
+				"champion-mastery" : time.time(),
+				"other" : time.time()
+			}
+		self.refresh_interval={
+				"static-data" : 14400,
+				"summoner" : 60,
+				"league" : 300,
+				"match" : 120,
+				"champion" : 600,
+				"champion-mastery" : 600,
+				"other" : 30
+			}
 
 		try:
 			keyFile=open("riotKey.txt", "r")
@@ -47,18 +64,33 @@ class LeagueOfLegends:
 			if self.key == None:
 				log.error("No Riot Key found. Please save a riotKey.txt or specify a environment variable 'RIOT_KEY'.")
 
-		self.allowed_locales=self.getData("/lol/static-data/v3/languages")["data"]
+		self.allowed_locales=self.getData("lol/static-data/v3/languages")["data"]
 
 	def getData(self, name):
+		endpoint="other"
+
+		if name.startswith("lol/static-data"):
+			endpoint="static-data"
+		elif name.startswith("lol/champion-mastery"):
+			endpoint="champion-mastery"
+		elif name.startswith("lol/platform/v3/champions"):
+			endpoint="champion"
+		elif name.startswith("lol/league"):
+			endpoint="league"
+		elif name.startswith("lol/match"):
+			endpoint="match"
+		elif name.startswith("lol/summoner"):
+			endpoint="summoner"
+
 		fetchtime=dataBase.readVal('lolStat/' + name.lower(), 'fetchtime')
-		if (fetchtime > 0) and (fetchtime+300 > time.time()):
+		if (fetchtime > 0) and (fetchtime+self.refresh_interval[endpoint] > time.time()):
 #			print('lolStat/' + name + '.json')
 			data=dataBase.dump('lolStat/' + name.lower())
 			if data == {}:
 				return None
 			return data
 
-		elif self.lastrun > time.time():
+		elif self.retry_after[endpoint] > time.time():
 			log.info('lolStat.getData: timeout. searching for cached results')
 			data=dataBase.dump('lolStat/' + name.lower())
 			if data == {}:
@@ -74,7 +106,7 @@ class LeagueOfLegends:
 				url=urllib.request.urlopen(req)
 			except urllib.error.HTTPError as e:
 				if e.code == 429:
-					self.lastrun=time.time() + int(e.headers['Retry-After'])
+					self.retry_after[endpoint]=time.time() + int(e.headers['Retry-After'])
 					log.info('lolStat.getData: got 429: rety after {} seconds. searching for cached results'.format(int(e.headers['Retry-After'])))
 					data=dataBase.dump('lolStat/' + name.lower())
 					if data == {}:
@@ -89,9 +121,6 @@ class LeagueOfLegends:
 
 				if isinstance(data, list):
 					data={'data' : data}
-				#for keyName in data.keys():
-				#	dataBase.writeVal('lolStat/' + name.lower(), keyName, data[keyName])
-				#dataBase.writeVal('lolStat/' + name.lower(), 'fetchtime', time.time())
 
 				data.update({"fetchtime" : time.time()})
 				
