@@ -83,7 +83,7 @@ def setConfig(id, queue_mode, loop):
 		if old == None:
 			cur.execute(sql.SQL("INSERT INTO music_config VALUES (%s, %s, %s)"), [str(id), queue_mode, loop])
 		else:
-			cur.execute(sql.SQL("UPDATE music_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(id), queue_mode, str(id)])	
+			cur.execute(sql.SQL("UPDATE music_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(id), queue_mode, loop, str(id)])	
 	
 		conn.commit()
 
