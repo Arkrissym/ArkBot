@@ -32,6 +32,7 @@ import shlex
 import collections
 import random
 import psycopg2
+from psycopg2 import sql
 
 import config
 from logger import logger as log
@@ -432,7 +433,7 @@ class Music:
 		if state.voice_client:
 			state.pause()
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(pass_context=True, no_pm=True, aliases=["continue"])
 	async def resume(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client:
