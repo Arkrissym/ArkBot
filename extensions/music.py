@@ -51,30 +51,34 @@ def getConfig(id):
 	if str(id) in _config.keys():
 		return [id, _config[str(id)]["queue_mode"], _config[str(id)]["loop"]]
 
-	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
-	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
-	cur.execute(sql.SQL("SELECT * FROM music_config WHERE id = %s"), [str(id)])
+	try:
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+		cur.execute(sql.SQL("SELECT * FROM music_config WHERE id = %s"), [str(id)])
 
-	ret = None
-	for row in cur:
-		if row[0] == str(id):
-			ret = row
-			_config[str(id)]={
-				"queue_mode" : ret[1],
-				"loop" : ret[2]
-				}
+		ret = None
+		for row in cur:
+			if row[0] == str(id):
+				ret = row
+				_config[str(id)]={
+					"queue_mode" : ret[1],
+					"loop" : ret[2]
+					}
 
-	cur.close()
-	conn.close()
+		cur.close()
+		conn.close()
 
-	return ret
+		return ret
+	except Exception as e:
+		log.warning("music - cannot read from database: %s", str(e))
+		return None
 
 def setConfig(id, queue_mode, loop):
 	try:
 		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 		cur=conn.cursor()
 
-		old = sqlReadConfig(id)
+		old = getConfig(id)
 		if old == None:
 			cur.execute(sql.SQL("INSERT INTO music_config VALUES (%s, %s, %s)"), [str(id), queue_mode, loop])
 		else:
@@ -84,8 +88,8 @@ def setConfig(id, queue_mode, loop):
 
 		cur.close()
 		conn.close()
-	except:
-		pass
+	except Exception as e:
+		log.warning("music - cannot write to database: %s", str(e))
 
 	_config[str(id)]={
 		"queue_mode" : queue_mode,

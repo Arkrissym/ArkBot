@@ -137,7 +137,7 @@ class LeagueOfLegends:
 		return None
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getPlayerInfo(self, ctx, name : str):
+	async def getPlayerInfo(self, ctx, *, name : str):
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
 
@@ -191,7 +191,7 @@ class LeagueOfLegends:
 		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getChampionLore(self, ctx, championName : str):
+	async def getChampionLore(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 
 		if locale in self.allowed_locales:
