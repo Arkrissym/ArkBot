@@ -32,7 +32,7 @@ import os
 import psycopg2
 from psycopg2 import sql
 
-class RainbowRole:
+class MulticolorRole:
 	def __init__(self, bot):
 		self.bot=bot
 		self.config={}
@@ -84,7 +84,7 @@ class RainbowRole:
 		try:
 			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 			cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
-			cur.execute(sql.SQL("SELECT * FROM rainbow_config WHERE id = %s"), [str(guild_id)])
+			cur.execute(sql.SQL("SELECT * FROM multicolor_config WHERE id = %s"), [str(guild_id)])
 
 			ret = None
 			for row in cur:
@@ -100,7 +100,7 @@ class RainbowRole:
 
 			return ret
 		except Exception as e:
-			log.warning("rainbowRole - cannot read from database: %s", str(e))
+			log.warning("multicolorRole - cannot read from database: %s", str(e))
 			return None
 
 	def setConfig(self, guild_id, role_id, interval):
@@ -110,16 +110,16 @@ class RainbowRole:
 
 			old = getConfig(guild_id)
 			if old == None:
-				cur.execute(sql.SQL("INSERT INTO rainbow_config VALUES (%s, %s, %s)"), [str(guild_id), str(role_id), str(interval)])
+				cur.execute(sql.SQL("INSERT INTO multicolor_config VALUES (%s, %s, %s)"), [str(guild_id), str(role_id), str(interval)])
 			else:
-				cur.execute(sql.SQL("UPDATE rainbow_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(guild_id), str(role_id), str(interval), str(guild_id)])	
+				cur.execute(sql.SQL("UPDATE multicolor_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(guild_id), str(role_id), str(interval), str(guild_id)])	
 	
 			conn.commit()
 
 			cur.close()
 			conn.close()
 		except Exception as e:
-			log.warning("rainbowRole - cannot write to database: %s", str(e))
+			log.warning("multicolorRole - cannot write to database: %s", str(e))
 
 		self.config[str(guild_id)]={
 			"role_id" : int(role_id),
@@ -149,18 +149,18 @@ class RainbowRole:
 		return 10
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def set_rainbow_role(self, ctx, *, role : discord.Role):
+	async def multicolor_role(self, ctx, *, role : discord.Role):
 		await self.bot.loop.run_in_executor(None, self.setConfig, ctx.guild.id, role.id, self.getInterval(ctx.guild.id))
 
-		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["rainbowRole"]["set_role"].format(str(role)))
+		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["set_role"].format(str(role)))
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def set_rainbow_interval(self, ctx, *, sec : int):
+	async def multicolor_interval(self, ctx, *, sec : int):
 		if sec < 1:
 			sec=1
 		await self.bot.loop.run_in_executor(None, self.setConfig, ctx.guild.id, self.getRoleId(ctx.guild.id), sec)
 
-		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["rainbowRole"]["set_interval"].format(sec))
+		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["set_interval"].format(sec))
 	
 def setup(bot):
-	bot.add_cog(RainbowRole(bot))
+	bot.add_cog(MulticolorRole(bot))
