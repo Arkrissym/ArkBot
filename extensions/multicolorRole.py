@@ -112,7 +112,7 @@ class MulticolorRole:
 			if old == None:
 				cur.execute(sql.SQL("INSERT INTO multicolor_config VALUES (%s, %s, %s)"), [str(guild_id), str(role_id), str(interval)])
 			else:
-				cur.execute(sql.SQL("UPDATE multicolor_config SET id = %s, queue_mode = %s, loop = %s WHERE id = %s"), [str(guild_id), str(role_id), str(interval), str(guild_id)])	
+				cur.execute(sql.SQL("UPDATE multicolor_config SET id = %s, role_id = %s, interval = %s WHERE id = %s"), [str(guild_id), str(role_id), str(interval), str(guild_id)])	
 	
 			conn.commit()
 
