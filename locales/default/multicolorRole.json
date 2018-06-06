@@ -1,4 +1,5 @@
 {
   "set_role": "Set {} as multicolor role.",
-  "set_interval": "Set rainbow interval to {} second(s)."
+  "set_interval": "Set rainbow interval to {} second(s).",
+  "disabled": "Disabled multicolor."
 }

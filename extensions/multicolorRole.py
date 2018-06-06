@@ -126,6 +126,22 @@ class MulticolorRole:
 			"interval" : int(interval)
 			}
 
+	def deleteConfig(self, guild_id):
+		try:
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			cur=conn.cursor()
+
+			cur.execute(sql.SQL("DELETE FROM multicolor_config WHERE id = %s)"), [str(guild_id)])
+			
+			conn.commit()
+
+			cur.close()
+			conn.close()
+		except Exception as e:
+			log.warning("multicolorRole - cannot delete from database: %s", str(e))
+
+		del self.config[str(guild_id)]
+
 	def getRoleId(self, guild_id):
 		try:
 			data=self.getConfig(guild_id)
@@ -161,6 +177,11 @@ class MulticolorRole:
 		await self.bot.loop.run_in_executor(None, self.setConfig, ctx.guild.id, self.getRoleId(ctx.guild.id), sec)
 
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["set_interval"].format(sec))
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def disable_multicolor(self, ctx):
+		await self.bot.loop.run_in_executor(None, self.deleteConfig, ctx.guild.id)
+		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["disabled"])
 	
 def setup(bot):
 	bot.add_cog(MulticolorRole(bot))

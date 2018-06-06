@@ -1,4 +1,5 @@
 {
-  "set_role": "Die Farbe der Rolle {} wird ab jetzt regelm‰ﬂig die Farbe wechseln.",
-  "set_interval": "Interval auf {} Sekunde(n) eingestellt."
+  "set_role": "Die Farbe der Rolle {} wird regelm√§√üig die Farbe wechseln.",
+  "set_interval": "Interval auf {} Sekunde(n) eingestellt.",
+  "disabled": "Farbwechsel abgeschaltet."
 }
