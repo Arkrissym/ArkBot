@@ -209,7 +209,60 @@ class LeagueOfLegends:
 					embed.add_field(name=championData["title"], value=championData["lore"])
 					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
 					await ctx.send(embed=embed)
-					return
+		else:
+			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
+
+	@commands.command(pass_context=True, no_pm=True)
+	async def getChampionStats(self, ctx, *, championName : str):
+		locale=config.getLocale(ctx.guild.id)
+
+		if locale in self.allowed_locales:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(locale))
+		else:
+			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?&champListData=all&tags=all&dataById=true")
+
+		if allChampionData != None:
+			version=allChampionData["version"]
+
+			for championKey in allChampionData["keys"]:
+				championData=allChampionData["data"][str(championKey)]
+				if championData["name"].lower() == championName.lower():
+					embed=discord.Embed(title=championData["name"])
+					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
+
+					for stat_name, stat_value in championData["stats"].items():
+						if stat_value > 0:
+							try:
+								name=config.strings[locale]["lolStat"][str(stat_name)]
+							except:
+								name=str(stat_name)
+
+							embed.add_field(name=name, value=stat_value)
+
+					for spell in championData["spells"]:
+						spellText=spell["sanitizedTooltip"]
+
+						if "effectBurn" in spell:
+							for i in range(1, len(spell["effectBurn"])):
+								spellText=spellText.replace("{{ e" + str(i) + " }}", spell["effectBurn"][i])
+
+						if "vars" in spell:
+							for var in spell["vars"]:
+								var_text=str(int(round(var["coeff"][0]*100, 3)))
+								for j in range(1, len(var["coeff"])):
+									var_text=var_text + "/" + str(int(round(var["coeff"][j]*100, 3)))
+
+								try:
+									link=config.strings[locale]["lolStat"][str(var["link"])]
+								except:
+									link=str(var["link"])
+								var_text=var_text + "% " + link
+								spellText=spellText.replace("{{ " + var["key"] + " }}", var_text)
+
+						embed.add_field(name=spell["name"], value=spellText, inline=False)
+
+					embed.set_footer(text=config.strings[locale]["lolStat"]["champion_data_disclaimer"])
+					await ctx.send(embed=embed)
 		else:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
