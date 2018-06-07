@@ -108,7 +108,7 @@ class MulticolorRole:
 			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 			cur=conn.cursor()
 
-			old = getConfig(guild_id)
+			old = self.getConfig(guild_id)
 			if old == None:
 				cur.execute(sql.SQL("INSERT INTO multicolor_config VALUES (%s, %s, %s)"), [str(guild_id), str(role_id), str(interval)])
 			else:
