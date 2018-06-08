@@ -6,3 +6,5 @@ dataBase/*
 ArkBot_Github.pyproj
 /.vs/ArkBot_Github/v15/.suo
 /ArkBot_Github.sln
+/sounds/magicShell/de_DE/*.mp3
+/sounds/magicShell/default/*.mp3

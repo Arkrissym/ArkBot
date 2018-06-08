@@ -1,0 +1,1 @@
+Add soundfiles in these subfolders named like the locales to make magicShell work.
