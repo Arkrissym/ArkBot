@@ -18,19 +18,19 @@
   "attack damage": "Angriffsschaden",
   "attackdamageperlevel": "Angriffsschaden pro Level",
   "attackrange": "Angriffsreichweite",
-  "attackspeedoffset": "attackspeedoffset",
+  "attackspeed": "Angriffsgeschwindigkeit",
   "attackspeedperlevel": "Angriffsgeschwindigkeit pro Level",
   "crit": "kritische Trefferchance",
   "critperlevel": "kritische Trefferchance pro Level",
   "hp": "Lebenspunkte",
   "hpperlevel": "Lebenspunkte pro Level",
   "hpregen": "Lebensregeneration",
-  "hpregenperlevel": "Lebensregenerations pro Level",
+  "hpregenperlevel": "Lebensregeneration pro Level",
   "movespeed": "Bewegungsgeschwindigkeit",
   "mp": "Ressourcenpool",
   "mpperlevel": "Ressourcenpool pro Level",
   "mpregen": "Ressourcenpoolregeneration",
   "mpregenperlevel": "Ressourcenpoolregeneration pro Level",
-  "spellblock": "spellblock",
-  "spellblockperlevel": "spellblockperlevel"
+  "spellblock": "Magieresistenz",
+  "spellblockperlevel": "Magieresistenz pro Level"
 }

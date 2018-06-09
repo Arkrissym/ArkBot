@@ -18,7 +18,7 @@
   "attack damage": "Attack Damage",
   "attackdamageperlevel": "Attack Damage per Level",
   "attackrange": "Attack range",
-  "attackspeedoffset": "attackspeedoffset",
+  "attackspeed": "Attack Speed",
   "attackspeedperlevel": "Attack speed per Level",
   "crit": "Crit rate",
   "critperlevel": "Crit rate per Level",
@@ -31,6 +31,6 @@
   "mpperlevel": "Ressource Pool per Level",
   "mpregen": "Ressource Pool Regeneration",
   "mpregenperlevel": "Ressource Pool Regeneration per Level",
-  "spellblock": "spellblock",
-  "spellblockperlevel": "spellblockperlevel"
+  "spellblock": "Magic Resistance",
+  "spellblockperlevel": "Magic Resistance per Level"
 }

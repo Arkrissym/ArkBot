@@ -231,16 +231,22 @@ class LeagueOfLegends:
 					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
 
 					for stat_name, stat_value in championData["stats"].items():
-						if stat_value > 0:
+						if stat_value > 0 and stat_name != "attackspeedoffset" and stat_name != "attackspeedperlevel":
 							try:
 								name=config.strings[locale]["lolStat"][str(stat_name)]
 							except:
 								name=str(stat_name)
 
 							embed.add_field(name=name, value=stat_value)
+						elif stat_name == "attackspeedoffset":
+							embed.add_field(name=config.strings[locale]["lolStat"]["attackspeed"] + "(Level 1)", value=round(0.625 / (1 - (stat_value * -1)), 3))
 
-					for spell in championData["spells"]:
-						spellText=spell["sanitizedTooltip"]
+					spells=[championData["passive"]] + championData["spells"]
+					for spell in spells:
+						if "sanitizedTooltip" in spell:
+							spellText=spell["sanitizedTooltip"]
+						else:
+							spellText=spell["sanitizedDescription"]
 
 						if "effectBurn" in spell:
 							for i in range(1, len(spell["effectBurn"])):
