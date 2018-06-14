@@ -249,6 +249,9 @@ class LeagueOfLegends:
 							spellText=spell["sanitizedDescription"]
 
 						if "effectBurn" in spell:
+							if spell["effectBurn"][0] != "":
+								spellText=spellText.replace("{{ e0 }}", spell["effectBurn"][0])
+
 							for i in range(1, len(spell["effectBurn"])):
 								spellText=spellText.replace("{{ e" + str(i) + " }}", spell["effectBurn"][i])
 
