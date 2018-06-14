@@ -8,3 +8,4 @@ ArkBot_Github.pyproj
 /ArkBot_Github.sln
 /sounds/magicShell/de_DE/*.mp3
 /sounds/magicShell/default/*.mp3
+ffmpeg*

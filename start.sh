@@ -22,6 +22,6 @@
 #OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #SOFTWARE.
 
-cd /home/pi/ArkBot
+cd /home/arkbot/ArkBot
 
 python3 bot.py &
