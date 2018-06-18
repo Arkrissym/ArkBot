@@ -257,6 +257,9 @@ class Music:
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_full'])
 			return None
 
+		if song_name.startswith("http://") == False and song_name.startswith("https://") == False:
+			song_name=song_name.replace(":", "")
+
 		ytdl_opts={
 			'format': 'webm[abr>0]/bestaudio/best',
 			'prefer_ffmpeg': True,
