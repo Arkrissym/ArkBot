@@ -1,0 +1,7 @@
+{
+  "join_channel": "Seems like i am already playing audio in another channel. Please try again later.",
+  "add_command": "Command {} added.",
+  "delete_command": "Command {} deleted.",
+  "command_exists": "Command {} already exists.",
+  "command_doesnt_exist": "Command {} doesn't exist."
+}

@@ -131,7 +131,7 @@ class MulticolorRole:
 			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 			cur=conn.cursor()
 
-			cur.execute(sql.SQL("DELETE FROM multicolor_config WHERE id = %s)"), [str(guild_id)])
+			cur.execute(sql.SQL("DELETE FROM multicolor_config WHERE id = %s"), [str(guild_id)])
 			
 			conn.commit()
 

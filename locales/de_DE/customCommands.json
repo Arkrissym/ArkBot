@@ -1,0 +1,7 @@
+{
+  "join_channel": "Scheinbar bin ich gerade damit beschäftigt, in einem anderen Channel Musik zu spielen. Versuch es doch später nochmal!",
+  "add_command": "Command {} wurde hinzugefügt.",
+  "delete_command": "Command {} wurde entfernt.",
+  "command_exists": "Command {} existiert bereits.",
+  "command_doesnt_exist": "Command {} existiert nicht."
+}
