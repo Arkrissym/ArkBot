@@ -62,11 +62,7 @@ class customCommands:
 						"type" : ret[2],
 						"result" : ret[3]
 						}
-					#self.commands[str(guild_id)][ret[1]]={
-					#	"type" : ret[2],
-					#	"result" : ret[3]
-					#	}
-
+			
 			self.commands[str(guild_id)]=ret
 
 			cur.close()
@@ -82,11 +78,7 @@ class customCommands:
 			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
 			cur=conn.cursor()
 
-			#old = self.getConfig(guild_id)
-			#if old == None:
 			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"), [str(guild_id), str(command), str(type), str(result)])
-			#else:
-			#	cur.execute(sql.SQL("UPDATE customCommands SET id = %s, command = %s, type = %s, result = %s WHERE id = %s"), [str(guild_id), str(command), str(type), str(result), str(guild_id)])	
 	
 			conn.commit()
 

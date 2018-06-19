@@ -135,9 +135,6 @@ class VoiceState:
 		self.previous_song=None
 		self.voice_client=None
 		self.voice_channel=None
-		#self.loop=False
-		#self.queue_mode="normal"
-		#self.songs=asyncio.Queue(maxsize=1000)
 		self.songs=collections.deque(maxlen=1000)
 		self.play_next_song=asyncio.Event()
 		self.audio_player=self.bot.loop.create_task(self.audio_player_task())
@@ -146,8 +143,6 @@ class VoiceState:
 		self.voice_client.stop()
 
 	async def stop(self):
-		#while self.songs.empty() == False:
-		#	await self.songs.get()
 		if len(self.songs) > 0:
 			self.songs.clear()
 		await self.voice_client.disconnect()
@@ -177,13 +172,11 @@ class VoiceState:
 				await asyncio.sleep(1.0)
 
 			if getLoopMode(self.voice_channel.guild.id) == "on" and self.previous_song != None:
-				#await self.songs.put(self.previous_song)
 				self.songs.append(self.previous_song)
 
 			while len(self.songs) == 0:
 				await asyncio.sleep(1.0)
 
-			#self.current_song=await self.songs.get()
 			self.current_song=self.songs.popleft()
 
 			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
@@ -210,7 +203,6 @@ class Music:
 		log.info("disconnected: pausing all streams")
 		for voice_state in self.voice_states:
 			try:
-#				voice_state.pause()
 				await voice_state.voice_client.disconnect()
 			except:
 				pass
@@ -219,15 +211,9 @@ class Music:
 	async def on_connect(self):
 		log.info("(re)connected: reconnecting to voice channels")
 		for voice_state in self.voice_states:
-#			try:
-#				if voice_state.voice_client.is_connected():
-#					await voice_state.voice_client.disconnect()
-#			except:
-#				pass
 			try:
 				if voice_state.voice_channel:
 					voice_state.voice_client=await voice_state.voice_channel.connect()
-#					voice_state.resume()
 			except:
 				pass
 

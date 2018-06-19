@@ -29,35 +29,8 @@ from faker.config import AVAILABLE_LOCALES
 import config
 
 class Nickname:
-		#nameList=[
-		#	'Noname',
-		#	'Alphakevin',
-		#	'Chantal',
-		#	'Teemo',
-		#	'Peter Müller, Klasse 2C',
-		#	'Count Schoko',
-		#	'Bob Ross',
-		#	'Donald Trump',
-		#	'Angela Merkel',
-		#	'Barack Obama',
-		#	'Zeuge Seehofas',
-		#	'Karsten Stahl',
-		#	'Hans Jörg'
-		#]
-
-	#@commands.command(pass_context=True, hidden=True, no_pm=True)
-	#async def yourmom(self, ctx):
-	#	oldName=ctx.author.nick
-	#	await ctx.author.edit(nick='Deine Mudda')
-	#	await asyncio.sleep(20)
-	#	await ctx.author.edit(nick=oldName)
-	#	await ctx.message.delete()
-
 	@commands.command(pass_context=True, no_pm=True)
 	async def randomnick(self, ctx):
-		#if random.randint(0, 2) < 1:
-		#	await ctx.author.edit(nick=self.nameList[random.randint(0, len(nameList) - 1)])
-		#else:
 		locale=config.getLocale(ctx.guild.id)
 		if locale in AVAILABLE_LOCALES:
 			await ctx.author.edit(nick=Faker(locale).name())
@@ -65,7 +38,6 @@ class Nickname:
 			await ctx.author.edit(nick=Faker().name())
 
 	@commands.command(pass_context=True, no_pm=True)
-#	@commands.has_permissions(change_nickname=True)
 	async def setnick(self, ctx, newNick : str=None):
 		if newNick:
 			await ctx.author.edit(nick=newNick)
