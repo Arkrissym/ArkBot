@@ -152,7 +152,7 @@ class customCommands:
 					try:
 						voice_client=await message.author.voice.channel.connect()
 					except discord.ClientException:
-						await message.channel.send(config.strings[locale]['customCommands']['join_channel'])
+						await message.channel.send(config.strings[config.getLocale(message.channel.guild.id)]['customCommands']['join_channel'])
 					else:
 						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, options='-loglevel warning'), volume=1.0))
 						await asyncio.sleep(duration+1)
