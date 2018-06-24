@@ -58,9 +58,9 @@ class customCommands:
 			ret = {}
 			for row in cur:
 				if row[0] == str(guild_id):
-					ret[ret[1]]={
-						"type" : ret[2],
-						"result" : ret[3]
+					ret[row[1]]={
+						"type" : row[2],
+						"result" : row[3]
 						}
 			
 			self.commands[str(guild_id)]=ret
