@@ -122,7 +122,7 @@ class customCommands:
 
 		prefix_len=len(config.getPrefix(message.guild.id))
 		all_commands=self.getCommands(message.guild.id)
-		print(all_commands)
+#		print(all_commands)
 
 		for command in all_commands.keys():
 			if command == message.content[prefix_len:]:
@@ -147,12 +147,12 @@ class customCommands:
 
 					url=info['url']
 					duration=info['duration']
-					print(duration)
+#					print(duration)
 
 					try:
 						voice_client=await message.author.voice.channel.connect()
 					except discord.ClientException:
-						await ctx.send(config.strings[locale]['customCommands']['join_channel'])
+						await message.channel.send(config.strings[locale]['customCommands']['join_channel'])
 					else:
 						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, options='-loglevel warning'), volume=1.0))
 						await asyncio.sleep(duration+1)
