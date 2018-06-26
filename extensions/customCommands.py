@@ -62,7 +62,7 @@ class customCommands:
 						"type" : row[2],
 						"result" : row[3]
 						}
-			
+
 			self.commands[str(guild_id)]=ret
 
 			cur.close()
@@ -79,7 +79,7 @@ class customCommands:
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"), [str(guild_id), str(command), str(type), str(result)])
-	
+
 			conn.commit()
 
 			cur.close()
@@ -106,7 +106,7 @@ class customCommands:
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("DELETE FROM customCommands WHERE id = %s AND command = %s"), [str(guild_id), str(command)])
-			
+
 			conn.commit()
 
 			cur.close()
@@ -149,6 +149,7 @@ class customCommands:
 					duration=info['duration']
 #					print(duration)
 
+					voice_client=None
 					try:
 						voice_client=await message.author.voice.channel.connect()
 					except discord.ClientException:
@@ -156,6 +157,8 @@ class customCommands:
 					else:
 						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, options='-loglevel warning'), volume=1.0))
 						await asyncio.sleep(duration+1)
+
+					if voice_client:
 						await voice_client.disconnect()
 				else: #text
 					await message.channel.send(all_commands[command]["result"])
