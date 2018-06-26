@@ -1,5 +1,6 @@
 {
-"calc_messages" : "Counting messages...",
-"sum_messages" : "You have {} messages."
+  "calc_messages" : "Counting messages...",
+  "sum_messages": "You have {} messages.",
+  "echo_brief": "Print a given string."
 }
 

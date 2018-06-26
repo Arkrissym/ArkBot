@@ -26,10 +26,118 @@ from discord.ext import commands
 import asyncio
 import random
 import os
+import itertools
+import inspect
 
 from logger import logger
 import config
 import dataBase
+
+class myHelpFormatter(discord.ext.commands.HelpFormatter):
+	def _add_subcommands_to_page(self, max_width, commands):
+		locale=config.getLocale(self.context.guild.id)
+
+		for name, command in commands:
+			if name in command.aliases:
+				# skip aliases
+				continue
+
+			short_doc=command.short_doc
+
+			try:
+				module_name=short_doc.split("+")[0]
+				string_name=short_doc.split("+")[1]
+				#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
+				short_doc=config.strings[locale][module_name][string_name]
+			except:
+				pass
+
+			#print(short_doc)
+
+			entry = '  {0:<{width}} {1}'.format(name, short_doc, width=max_width)
+			shortened = self.shorten(entry)
+			self._paginator.add_line(shortened)
+
+	async def format(self):
+		#print("format")
+
+		locale=config.getLocale(self.context.guild.id)
+
+		self._paginator = discord.ext.commands.Paginator()
+
+		# we need a padding of ~80 or so
+
+		description = self.command.description if not self.is_cog() else inspect.getdoc(self.command)
+
+		if description:
+			try:
+				module_name=description.split("+")[0]
+				string_name=description.split("+")[1]
+				#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
+				description=config.strings[locale][module_name][string_name]
+			except:
+				pass
+
+			# <description> portion
+			self._paginator.add_line(description, empty=True)
+			#print(description)
+
+		if isinstance(self.command, discord.ext.commands.Command):
+			# <signature portion>
+			signature = self.get_command_signature()
+			self._paginator.add_line(signature, empty=True)
+			#print("signature: " + signature)
+
+			# <long doc> section
+			if self.command.help:
+				cmd_help=self.command.help
+
+				try:
+					module_name=cmd_help.split("+")[0]
+					string_name=cmd_help.split("+")[1]
+					#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
+					cmd_help=config.strings[locale][module_name][string_name]
+				except:
+					pass
+				self._paginator.add_line(cmd_help, empty=True)
+				#print(cmd_help)
+
+			# end it here if it's just a regular command
+			if not self.has_subcommands():
+				self._paginator.close_page()
+				return self._paginator.pages
+
+		max_width = self.max_name_size
+
+		def category(tup):
+			cog = tup[1].cog_name
+			# we insert the zero width space there to give it approximate
+			# last place sorting position.
+			return cog + ':' if cog is not None else '\u200bNo Category:'
+
+		filtered = await self.filter_command_list()
+		if self.is_bot():
+			data = sorted(filtered, key=category)
+			for category, commands in itertools.groupby(data, key=category):
+				# there simply is no prettier way of doing this.
+				commands = sorted(commands)
+				if len(commands) > 0:
+					self._paginator.add_line(category)
+
+				#print(category)
+				#print(commands)
+				self._add_subcommands_to_page(max_width, commands)
+		else:
+			filtered = sorted(filtered)
+			if filtered:
+				self._paginator.add_line('Commands:')
+				self._add_subcommands_to_page(max_width, filtered)
+
+		# add the ending note
+		self._paginator.add_line()
+		ending_note = self.get_ending_note()
+		self._paginator.add_line(ending_note)
+		return self._paginator.pages
 
 async def guild_prefix(bot, message):
 	r=list()
@@ -41,7 +149,7 @@ async def guild_prefix(bot, message):
 
 	return r
 
-bot=commands.AutoShardedBot(command_prefix=guild_prefix)
+bot=commands.AutoShardedBot(command_prefix=guild_prefix, formatter=myHelpFormatter())
 
 @bot.event
 async def on_ready():

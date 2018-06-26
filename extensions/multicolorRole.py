@@ -47,7 +47,7 @@ class MulticolorRole:
 				try:
 					await c
 				except Exception as e:
-					log.warning("await c: {}".format(str(e)))
+					log.info("Cannot change color(await c): {}".format(str(e)))
 			await asyncio.sleep(1)
 
 	def change_color(self):

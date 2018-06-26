@@ -1,4 +1,5 @@
 {
-"calc_messages" : "Nachrichten werden gezählt...",
-"sum_messages" : "Du hast {} Nachrichten gesendet."
+  "calc_messages": "Nachrichten werden gezählt...",
+  "sum_messages": "Du hast {} Nachrichten gesendet.",
+  "echo_brief": "Schreibt die gegebene Zeichenkette."
 }

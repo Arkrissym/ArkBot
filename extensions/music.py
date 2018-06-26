@@ -441,7 +441,7 @@ class Music:
 			embed=discord.Embed(title=config.strings[locale]['music']['nowplaying_song'])
 			embed.add_field(name=config.strings[locale]['music']['nowplaying_title'], value=voice_state.current_song.name)
 			embed.add_field(name=config.strings[locale]['music']['nowplaying_uploader'], value=voice_state.current_song.uploader)
-			embed.add_field(name=config.strings[locale]['music']['nowplaying_requester'], value=voice_state.current_song.requester.display_name)
+			#embed.add_field(name=config.strings[locale]['music']['nowplaying_requester'], value=voice_state.current_song.requester.display_name)
 			if voice_state.current_song.thumbnail_url != None:
 				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
@@ -530,7 +530,8 @@ class Music:
 			embed=discord.Embed(title=config.strings[locale]['music']['queue_title'])
 			for i in range(1, 11):
 				song=await songs.get()
-				embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}\n{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], song.uploader, config.strings[locale]['music']['nowplaying_requester'], song.requester.display_name), inline=False)
+				#embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}\n{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], song.uploader, config.strings[locale]['music']['nowplaying_requester'], song.requester.display_name), inline=False)
+				embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], song.uploader), inline=False)
 				if songs.empty():
 					break
 			if songs.qsize() > 0:
