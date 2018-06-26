@@ -58,11 +58,11 @@ class CustomCommands:
 			ret = {}
 			for row in cur:
 				if row[0] == str(guild_id):
-					ret[ret[1]]={
-						"type" : ret[2],
-						"result" : ret[3]
+					ret[row[1]]={
+						"type" : row[2],
+						"result" : row[3]
 						}
-			
+
 			self.commands[str(guild_id)]=ret
 
 			cur.close()
@@ -79,7 +79,7 @@ class CustomCommands:
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"), [str(guild_id), str(command), str(type), str(result)])
-	
+
 			conn.commit()
 
 			cur.close()
@@ -106,7 +106,7 @@ class CustomCommands:
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("DELETE FROM customCommands WHERE id = %s AND command = %s"), [str(guild_id), str(command)])
-			
+
 			conn.commit()
 
 			cur.close()
@@ -122,7 +122,7 @@ class CustomCommands:
 
 		prefix_len=len(config.getPrefix(message.guild.id))
 		all_commands=self.getCommands(message.guild.id)
-		print(all_commands)
+#		print(all_commands)
 
 		for command in all_commands.keys():
 			if command == message.content[prefix_len:]:
@@ -147,15 +147,18 @@ class CustomCommands:
 
 					url=info['url']
 					duration=info['duration']
-					print(duration)
+#					print(duration)
 
+					voice_client=None
 					try:
 						voice_client=await message.author.voice.channel.connect()
 					except discord.ClientException:
-						await ctx.send(config.strings[locale]['customCommands']['join_channel'])
+						await message.channel.send(config.strings[config.getLocale(message.channel.guild.id)]['customCommands']['join_channel'])
 					else:
 						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, options='-loglevel warning'), volume=1.0))
 						await asyncio.sleep(duration+1)
+
+					if voice_client:
 						await voice_client.disconnect()
 				else: #text
 					await message.channel.send(all_commands[command]["result"])
