@@ -226,6 +226,13 @@ class CustomCommands:
 			return
 
 		await ctx.bot.loop.run_in_executor(None, self.deleteCommand, ctx.guild.id, command)
+
+		try:
+			os.remove('{}/../sounds/customCommands/{}/{}_duration.txt'.format(os.path.dirname(__file__), str(ctx.guild.id), command))
+			os.remove('{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command))
+		except:
+			pass
+
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['delete_command'].format(command))
 
 	@commands.command(pass_context=True, no_pm=True, brief="customCommands+add_text_command_brief", help="customCommands+add_text_command_help")
