@@ -51,12 +51,13 @@ class CustomCommands:
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
 			for g in self.bot.guilds:
+#				log.info("checking guild: " + str(g))
 				all_commands=self.getCommands(g.id)
 				for command in all_commands.keys():
 					try:
-						if all_commands[command]["type"] == "music" and not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
+						if all_commands[command]["type"] == "music" and not str(g.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
 							link_or_name=all_commands[command]["result"]
-						
+
 							ytdl_opts={
 								'format': 'webm[abr>0]/bestaudio/best',
 								'prefer_ffmpeg': True,
@@ -68,7 +69,7 @@ class CustomCommands:
 							}
 
 							ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-							info=await ctx.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
+							info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
 
 							if "entries" in info:
 								info=info['entries'][0]
@@ -78,18 +79,18 @@ class CustomCommands:
 
 							source=info['url']
 							duration=info['duration']
-		
+
 							filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(g.id), command)
 
-							log.info("Downloading audio for command: " + command)
 							pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
-		
-							await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
+
+							log.info("Downloading audio for command: " + command)
+							await self.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
 							with open('{}/../sounds/customCommands/{}/{}_duration.txt'.format(os.path.dirname(__file__), str(g.id), command), "w") as file:
 								file.write(str(duration) + "\n")
 								file.close()
-					except:
-						pass
+					except Exception as e:
+						log.warning(str(e))
 
 	def getCommands(self, guild_id):
 		if str(guild_id) in self.commands.keys():
@@ -175,7 +176,7 @@ class CustomCommands:
 					if message.author.voice.channel == None:
 						continue
 
-					if "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
+					if str(message.guild.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
 						source='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(message.guild.id), command)
 						try:
 							with open('{}/../sounds/customCommands/{}/{}_duration.txt'.format(os.path.dirname(__file__), str(message.guild.id), command), "r") as file:
@@ -267,12 +268,12 @@ class CustomCommands:
 
 			source=info['url']
 			duration=info['duration']
-		
+
 			filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command)
 
 			log.info("Downloading audio for command: " + command)
 			pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
-		
+
 			await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
 			with open('{}/../sounds/customCommands/{}/{}_duration.txt'.format(os.path.dirname(__file__), str(ctx.guild.id), command), "w") as file:
 				file.write(str(duration) + "\n")
