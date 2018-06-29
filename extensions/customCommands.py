@@ -48,6 +48,7 @@ class CustomCommands:
 		self.bot=bot
 		self.commands={}
 
+	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
 			for g in self.bot.guilds:
 				all_commands=getCommands(g.id)
@@ -66,7 +67,7 @@ class CustomCommands:
 						}
 
 						ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-						info=ytdl.extract_info(link_or_name, False)
+						info=await ctx.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
 
 						if "entries" in info:
 							info=info['entries'][0]
@@ -82,7 +83,7 @@ class CustomCommands:
 						log.info("Downloading audio for command: " + command)
 						pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 		
-						subprocess.call(["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
+						await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
 						with open('{}/../sounds/customCommands/{}/{}_duration.txt'.format(os.path.dirname(__file__), str(g.id), command), "w") as file:
 							file.write(str(duration) + "\n")
 							file.close()
