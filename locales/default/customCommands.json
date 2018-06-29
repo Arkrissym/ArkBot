@@ -9,5 +9,6 @@
   "add_command": "Command {} added.",
   "delete_command": "Command {} deleted.",
   "command_exists": "Command {} already exists.",
-  "command_doesnt_exist": "Command {} doesn't exist."
+  "command_doesnt_exist": "Command {} doesn't exist.",
+  "warn_live": "Cannot use live streams in custom commands."
 }
