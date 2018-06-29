@@ -51,7 +51,7 @@ class CustomCommands:
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
 			for g in self.bot.guilds:
-				all_commands=getCommands(g.id)
+				all_commands=self.getCommands(g.id)
 				for commmand in all_commands.keys():
 					if all_commands[command]["type"] == "music" and not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
 						link_or_name=all_commands[command]["result"]
