@@ -408,7 +408,7 @@ class Music:
 	@commands.command(pass_context=True, no_pm=True, aliases=["quit"])
 	async def stop(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
-		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (len(state.voice_channel.members) == 0)):
+		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (len(discord.utils.get(ctx.guild.voice_channels, id=state.voice_channel.id).members) == 0)):
 			await state.stop()
 
 	@commands.command(pass_context=True, no_pm=True)
