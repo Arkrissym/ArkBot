@@ -220,7 +220,7 @@ class Music:
 	@commands.command(pass_context=True, no_pm=True, aliases=["summon"])
 	async def join(self, ctx, *, channel : discord.VoiceChannel=None):
 		if channel == None:
-			if ctx.message.author.voice.channel == None:
+			if ctx.message.author.voice == None:
 				return
 			else:
 				channel=ctx.message.author.voice.channel
@@ -230,7 +230,23 @@ class Music:
 			state.voice_client=await channel.connect()
 			state.voice_channel=channel
 		except discord.ClientException:
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_channel'])
+			move=False
+			for ch in ctx.guild.voice_channels:
+				if ctx.bot.user in ch.members and len(ch.members) == 1:
+					move=True
+			
+			if channel == state.voice_channel:
+				move=True
+
+			if move == True:
+				try:
+					await state.voice_client.move_to(channel)
+					state.voice_channel=channel
+				except Exception as e:
+					log.error(str(e))
+					await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_channel'])
+			else:
+				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_channel'])
 		except discord.InvalidArgument:
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_no_channel'])
 		else:
