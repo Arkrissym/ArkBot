@@ -322,7 +322,7 @@ class Music:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)#, description=config.strings[config.getLocale(ctx.guild.id)]['music']['playytlist_description'])
+	@commands.command(pass_context=True, no_pm=True, help="music+playytlist_description")
 	async def playytlist(self, ctx, *, playlist_link : str):
 		locale=config.getLocale(ctx.guild.id)
 
@@ -408,25 +408,25 @@ class Music:
 	@commands.command(pass_context=True, no_pm=True, aliases=["quit"])
 	async def stop(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
-		if state.voice_client:
+		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (len(state.voice_channel.members) == 0)):
 			await state.stop()
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def skip(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
-		if state.voice_client:
+		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.skip()
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def pause(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
-		if state.voice_client:
+		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.pause()
 
 	@commands.command(pass_context=True, no_pm=True, aliases=["continue"])
 	async def resume(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
-		if state.voice_client:
+		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.resume()
 
 	@commands.command(pass_context=True, no_pm=True, aliases=['np', 'current'])
@@ -483,6 +483,9 @@ class Music:
 	@commands.command(pass_context=True, no_pm=True)
 	async def repeat(self, ctx):
 		voice_state=self.get_voice_state(ctx.message.guild)
+
+		if ctx.author.voice == None or state.voice_channel != ctx.author.voice.channel:
+			return
 
 		previous=voice_state.previous_song
 		current=voice_state.current_song

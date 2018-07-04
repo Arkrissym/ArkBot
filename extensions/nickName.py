@@ -38,7 +38,7 @@ class Nickname:
 			await ctx.author.edit(nick=Faker().name())
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def setnick(self, ctx, newNick : str=None):
+	async def setnick(self, ctx, *, newNick : str=None):
 		if newNick:
 			await ctx.author.edit(nick=newNick)
 		else:

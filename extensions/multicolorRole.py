@@ -165,14 +165,14 @@ class MulticolorRole:
 		return 10
 
 	@commands.command(pass_context=True, no_pm=True)
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def multicolor_role(self, ctx, *, role : discord.Role):
 		await self.bot.loop.run_in_executor(None, self.setConfig, ctx.guild.id, role.id, self.getInterval(ctx.guild.id))
 
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["set_role"].format(str(role)))
 
 	@commands.command(pass_context=True, no_pm=True)
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def multicolor_interval(self, ctx, *, sec : int):
 		if sec < 1:
 			sec=1
@@ -181,7 +181,7 @@ class MulticolorRole:
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["set_interval"].format(sec))
 
 	@commands.command(pass_context=True, no_pm=True)
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def disable_multicolor(self, ctx):
 		await self.bot.loop.run_in_executor(None, self.deleteConfig, ctx.guild.id)
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]["multicolorRole"]["disabled"])

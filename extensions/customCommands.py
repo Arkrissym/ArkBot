@@ -219,7 +219,7 @@ class CustomCommands:
 					await message.channel.send(all_commands[command]["result"])
 
 	@commands.command(pass_context=True, no_pm=True, brief="customCommands+delete_command_brief", help="customCommands+delete_command_help")
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def delete_command(self, ctx, command : str):
 		if not command in self.getCommands(ctx.guild.id).keys():
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_doesnt_exist'].format(command))
@@ -236,7 +236,7 @@ class CustomCommands:
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['delete_command'].format(command))
 
 	@commands.command(pass_context=True, no_pm=True, brief="customCommands+add_text_command_brief", help="customCommands+add_text_command_help")
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def add_text_command(self, ctx, command : str, *, answer : str):
 		if command in self.getCommands(ctx.guild.id).keys():
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_exists'].format(command))
@@ -246,7 +246,7 @@ class CustomCommands:
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['add_command'].format(command))
 
 	@commands.command(pass_context=True, no_pm=True, brief="customCommands+add_music_command_brief", help="customCommands+add_music_command_help")
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def add_music_command(self, ctx, command : str, *, link_or_name : str):
 		if command in self.getCommands(ctx.guild.id).keys():
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_exists'].format(command))

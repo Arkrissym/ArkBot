@@ -50,7 +50,7 @@ class ClearHistory:
 			await ctx.message.channel.delete_messages(msgs)
 
 	@commands.command(pass_context=True, no_pm=True, description='tabularasa protocol')
-	@commands.has_permissions(administrator=True)
+	@config.is_admin_or_owner()
 	async def tabularasa(self, ctx):
 		async for log in ctx.message.channel.history(limit=None):
 			await log.delete()
