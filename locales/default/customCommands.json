@@ -1,4 +1,5 @@
 {
+  "list_commands_help": "Lists all commands.",
   "delete_command_brief": "Deletes a command.",
   "delete_command_help": "Delete the command that is named <command>.",
   "add_text_command_brief": "Adds a command that responds a text.",
@@ -6,6 +7,7 @@
   "add_music_command_brief": "Adds a command that plays \"music\".",
   "add_music_command_help": "Adds a command that plays \"music\".\nWhen using <command> the bot will try to join your voice channel and play <link_or_name>.",
   "join_channel": "Seems like i am already playing audio in another channel. Please try again later.",
+  "no_commands": "This server doesn't have any custom commands.",
   "add_command": "Command {} added.",
   "delete_command": "Command {} deleted.",
   "command_exists": "Command {} already exists.",

@@ -218,6 +218,19 @@ class CustomCommands:
 				else: #text
 					await message.channel.send(all_commands[command]["result"])
 
+	@commands.command(pass_context=True, no_pm=True, help="customCommands+list_commands_help")
+	async def list_commands(self, ctx):
+		text=""
+		for command_name in self.getCommands(ctx.guild.id).keys():
+			text=text + "\n" + command_name
+
+		if text == "":
+			text=config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["no_commands"]
+
+		#embed=discord.Embed(title=config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["list_commands"], description=text)
+		embed=discord.Embed(description=text)
+		await ctx.send(embed=embed)
+
 	@commands.command(pass_context=True, no_pm=True, brief="customCommands+delete_command_brief", help="customCommands+delete_command_help")
 	@config.is_admin_or_owner()
 	async def delete_command(self, ctx, command : str):

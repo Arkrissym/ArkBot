@@ -1,4 +1,5 @@
 {
+  "list_commands_help": "Zeigt alle Commands an.",
   "delete_command_brief": "Löscht einen Command.",
   "delete_command_help": "Löscht den Command mit dem Namen <command>.",
   "add_text_command_brief": "Fügt einen Text-Command hinzu.",
@@ -6,8 +7,9 @@
   "add_music_command_brief": "Fügt einen \"Musik\"-Command hinzu.",
   "add_music_command_help": "Fügt einen \"Musik\"-Command hinzu.\nWenn <command> benutzt wird, versucht der Bot deinem Voice-Channel zu joinen und <link_or_name> abzuspielen.\nAnschließend verlässt er den Channel wieder.",
   "join_channel": "Scheinbar bin ich gerade damit beschäftigt, in einem anderen Channel Musik zu spielen. Versuch es doch später nochmal!",
+  "no_command": "Dieser Server hat keine benutzerdefinierten Commands.",
   "add_command": "Command {} wurde hinzugefügt.",
-  "delete_command": "Command {} wurde entfernt.",
+  "delete_commands": "Command {} wurde entfernt.",
   "command_exists": "Command {} existiert bereits.",
   "command_doesnt_exist": "Command {} existiert nicht.",
   "warn_live": "Livestreams können nicht in custom Commands benutzt werden."
