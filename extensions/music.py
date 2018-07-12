@@ -33,9 +33,11 @@ import collections
 import random
 import psycopg2
 from psycopg2 import sql
+import pathlib
 
 import config
 from logger import logger as log
+import dataBase
 
 if not discord.opus.is_loaded():
 	try:
@@ -120,13 +122,14 @@ def getLoopMode(id):
 	return "off"
 
 class VoiceEntry:
-	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader):
+	def __init__(self, requester, channel, song_name, url, thumbnail_url, uploader, id):
 		self.requester=requester
 		self.channel=channel
 		self.name=song_name
 		self.url=url
 		self.thumbnail_url=thumbnail_url
 		self.uploader=uploader
+		self.id=id
 
 class VoiceState:
 	def __init__(self, bot):
@@ -179,8 +182,54 @@ class VoiceState:
 
 			self.current_song=self.songs.popleft()
 
-			self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
+			proc=None
+			download=False
+
+			if self.current_song.id == None:
+				log.info("music - streaming audio")
+				self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
+			elif not "music" in os.listdir('{}/../sounds'.format(os.path.dirname(__file__))) or not any(f.startswith("{}_".format(self.current_song.id)) for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__)))):
+				if config.config["music"]["download_audio"].lower() == "true":
+					log.info("music - streaming and downloading audio")
+					filename='{}/../sounds/music/{}_{}.mp3'.format(os.path.dirname(__file__), self.current_song.id, self.current_song.name)
+
+					pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
+				
+					args=["ffmpeg"]
+					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
+
+					download=True
+
+					proc=subprocess.Popen(args, stdout=subprocess.PIPE)
+				
+					self.voice_client.play(discord.PCMVolumeTransformer(discord.PCMAudio(proc.stdout), volume=0.3), after=self.play_next)
+					dataBase.writeVal("music/play_times", self.current_song.id, time.time())
+				else:
+					log.info("music - streaming audio")
+					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
+			else:
+				log.info("music - playing stored audio")
+				for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__))):
+					if f.startswith("{}_".format(self.current_song.id)):
+						break
+				filename='{}/../sounds/music/{}'.format(os.path.dirname(__file__), f)
+
+				self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(filename, options='-loglevel warning'), volume=0.3), after=self.play_next)
+				dataBase.writeVal("music/play_times", self.current_song.id, time.time())
+			
 			await self.play_next_song.wait()
+
+			if proc is not None:
+				log.info('Preparing to terminate ffmpeg process %s.', proc.pid)
+				proc.kill()
+				if proc.poll() is None:
+					log.info('ffmpeg process %s has not terminated. Waiting to terminate...', proc.pid)
+					proc.communicate()
+					log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid, proc.returncode)
+					if download == True:
+						os.remove(filename)
+				else:
+					log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
 
 class Music:
 	def __init__(self, bot):
@@ -295,7 +344,12 @@ class Music:
 		else:
 			uploader='Unknown'
 
-		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
+		if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
+			id=info['id']
+		else:
+			id=None
+
+		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
 
 		if getQueueMode(ctx.guild.id) == 'random' and len(voice_state.songs) > 1:
 			voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), entry)
@@ -408,11 +462,16 @@ class Music:
 				else:
 					uploader=None
 
+				if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
+					id=info['id']
+				else:
+					id=None
+
 				if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
 					await ctx.send(config.strings[locale]['music']['queue_full'])
 					return
 
-				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader)
+				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
 
 				if queue_mode == 'random' and len(voice_state.songs) > 1:
 					voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), song_entry)
@@ -421,7 +480,7 @@ class Music:
 		else:
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
 
-	@commands.command(pass_context=True, no_pm=True, aliases=["quit"])
+	@commands.command(pass_context=True, no_pm=True, aliases=["quit", "leave"])
 	async def stop(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (len(discord.utils.get(ctx.guild.voice_channels, id=state.voice_channel.id).members) == 1)):
@@ -500,7 +559,7 @@ class Music:
 	async def repeat(self, ctx):
 		voice_state=self.get_voice_state(ctx.message.guild)
 
-		if ctx.author.voice == None or state.voice_channel != ctx.author.voice.channel:
+		if ctx.author.voice == None or voice_state.voice_channel != ctx.author.voice.channel:
 			return
 
 		previous=voice_state.previous_song
