@@ -227,7 +227,11 @@ class LeagueOfLegends:
 			for championKey in allChampionData["keys"]:
 				championData=allChampionData["data"][str(championKey)]
 				if championData["name"].lower() == championName.lower():
-					embed=discord.Embed(title=championData["name"] + ", " + championData["title"])
+					tags=config.strings[locale]["lolStat"][championData["tags"][0]]
+					for i in range(1, len(championData["tags"])):
+						tags="{}, {}".format(tags, config.strings[locale]["lolStat"][championData["tags"][i]])
+
+					embed=discord.Embed(title=championData["name"] + ", " + championData["title"], description=tags)
 					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
 
 					for stat_name, stat_value in championData["stats"].items():
