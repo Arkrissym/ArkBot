@@ -194,15 +194,6 @@ class VoiceState:
 
 					song_name=self.current_song.name.replace("\\", "_")
 					song_name=song_name.replace("/", "_")
-#					song_name=song_name.replace(" ", "_")
-#					song_name=song_name.replace(":", "_")
-#					song_name=song_name.replace("[", "_")
-#					song_name=song_name.replace("]", "_")
-#					song_name=song_name.replace("-", "_")
-#					song_name=song_name.replace("(", "_")
-#					song_name=song_name.replace(")", "_")
-#					song_name=song_name.replace("{", "_")
-#					song_name=song_name.replace("}", "_")
 
 					filename='{}/../sounds/music/{}_{}.mp3'.format(os.path.dirname(__file__), self.current_song.id, song_name)
 
@@ -210,14 +201,12 @@ class VoiceState:
 				
 					args=["ffmpeg"]
 					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
-#					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-loglevel", "warning"))
 
 					download=True
 
 					proc=subprocess.Popen(args, stdout=subprocess.PIPE)
 				
 					self.voice_client.play(discord.PCMVolumeTransformer(discord.PCMAudio(proc.stdout), volume=0.3), after=self.play_next)
-#					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
 					dataBase.writeVal("music/play_times", self.current_song.id, time.time())
 				else:
 					log.info("music - streaming audio")
@@ -276,7 +265,7 @@ class Music:
 		log.info("(re)connected: reconnecting to voice channels")
 		for voice_state in self.voice_states:
 			try:
-				await voice_state.voice_client.disconnect()
+				await voice_state.voice_client.pause()
 			except:
 				pass
 			try:
@@ -535,7 +524,6 @@ class Music:
 			embed=discord.Embed(title=config.strings[locale]['music']['nowplaying_song'])
 			embed.add_field(name=config.strings[locale]['music']['nowplaying_title'], value=voice_state.current_song.name)
 			embed.add_field(name=config.strings[locale]['music']['nowplaying_uploader'], value=voice_state.current_song.uploader)
-			#embed.add_field(name=config.strings[locale]['music']['nowplaying_requester'], value=voice_state.current_song.requester.display_name)
 			if voice_state.current_song.thumbnail_url != None:
 				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
@@ -627,7 +615,6 @@ class Music:
 			embed=discord.Embed(title=config.strings[locale]['music']['queue_title'])
 			for i in range(1, 11):
 				song=await songs.get()
-				#embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}\n{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], song.uploader, config.strings[locale]['music']['nowplaying_requester'], song.requester.display_name), inline=False)
 				embed.add_field(name='{}: {}'.format(i, song.name), value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], song.uploader), inline=False)
 				if songs.empty():
 					break
