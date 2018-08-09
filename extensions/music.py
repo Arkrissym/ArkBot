@@ -191,18 +191,33 @@ class VoiceState:
 			elif not "music" in os.listdir('{}/../sounds'.format(os.path.dirname(__file__))) or not any(f.startswith("{}_".format(self.current_song.id)) for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__)))):
 				if config.config["music"]["download_audio"].lower() == "true":
 					log.info("music - streaming and downloading audio")
-					filename='{}/../sounds/music/{}_{}.mp3'.format(os.path.dirname(__file__), self.current_song.id, self.current_song.name)
+
+					song_name=self.current_song.name.replace("\\", "_")
+					song_name=song_name.replace("/", "_")
+#					song_name=song_name.replace(" ", "_")
+#					song_name=song_name.replace(":", "_")
+#					song_name=song_name.replace("[", "_")
+#					song_name=song_name.replace("]", "_")
+#					song_name=song_name.replace("-", "_")
+#					song_name=song_name.replace("(", "_")
+#					song_name=song_name.replace(")", "_")
+#					song_name=song_name.replace("{", "_")
+#					song_name=song_name.replace("}", "_")
+
+					filename='{}/../sounds/music/{}_{}.mp3'.format(os.path.dirname(__file__), self.current_song.id, song_name)
 
 					pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 				
 					args=["ffmpeg"]
 					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
+#					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-loglevel", "warning"))
 
 					download=True
 
 					proc=subprocess.Popen(args, stdout=subprocess.PIPE)
 				
 					self.voice_client.play(discord.PCMVolumeTransformer(discord.PCMAudio(proc.stdout), volume=0.3), after=self.play_next)
+#					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
 					dataBase.writeVal("music/play_times", self.current_song.id, time.time())
 				else:
 					log.info("music - streaming audio")
@@ -260,6 +275,10 @@ class Music:
 	async def on_connect(self):
 		log.info("(re)connected: reconnecting to voice channels")
 		for voice_state in self.voice_states:
+			try:
+				await voice_state.voice_client.disconnect()
+			except:
+				pass
 			try:
 				if voice_state.voice_channel:
 					voice_state.voice_client=await voice_state.voice_channel.connect()
