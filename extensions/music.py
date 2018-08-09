@@ -252,13 +252,13 @@ class Music:
 		return state
 
 	#pause all streams
-	async def on_disconnect():
-		log.info("disconnected: pausing all streams")
-		for voice_state in self.voice_states:
-			try:
-				await voice_state.voice_client.pause()
-			except:
-				pass
+#	async def on_disconnect():
+#		log.info("disconnected: pausing all streams")
+#		for voice_state in self.voice_states:
+#			try:
+#				await voice_state.voice_client.pause()
+#			except:
+#				pass
 
 	#reconnect and resume all streams
 	async def on_connect(self):
