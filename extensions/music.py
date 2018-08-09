@@ -256,7 +256,7 @@ class Music:
 		log.info("disconnected: pausing all streams")
 		for voice_state in self.voice_states:
 			try:
-				await voice_state.voice_client.disconnect()
+				await voice_state.voice_client.pause()
 			except:
 				pass
 
@@ -265,7 +265,7 @@ class Music:
 		log.info("(re)connected: reconnecting to voice channels")
 		for voice_state in self.voice_states:
 			try:
-				await voice_state.voice_client.pause()
+				await voice_state.voice_client.disconnect()
 			except:
 				pass
 			try:
