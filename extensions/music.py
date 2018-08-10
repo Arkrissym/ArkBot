@@ -271,8 +271,9 @@ class Music:
 			try:
 				if voice_state.voice_channel:
 					voice_state.voice_client=await voice_state.voice_channel.connect()
-			except:
-				pass
+			except Exception as e:
+#				pass
+				log.warning("Cannot reconnect to channel {}: {}".format(voice_state.voice_channel, str(e)))
 
 	@commands.command(pass_context=True, no_pm=True, aliases=["summon"])
 	async def join(self, ctx, *, channel : discord.VoiceChannel=None):
