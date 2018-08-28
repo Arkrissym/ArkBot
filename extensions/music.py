@@ -261,19 +261,28 @@ class Music:
 #				pass
 
 	#reconnect and resume all streams
-	async def on_connect(self):
+	async def on_ready(self):
 		log.info("(re)connected: reconnecting to voice channels")
-		for voice_state in self.voice_states:
+		for server in self.voice_states.keys():
+			voice_state=self.get_voice_state(server)
 			try:
 				await voice_state.voice_client.disconnect()
-			except:
-				pass
+			except Exception as e:
+				try:
+					ch_name=str(voice_state.voice_channel)
+				except:
+					ch_name="UNKNOWN"
+				log.warning("Cannot disconnect from channel {}: {}".format(ch_name, str(e)))
 			try:
 				if voice_state.voice_channel:
 					voice_state.voice_client=await voice_state.voice_channel.connect()
 			except Exception as e:
 #				pass
-				log.warning("Cannot reconnect to channel {}: {}".format(voice_state.voice_channel, str(e)))
+				try:
+					ch_name=str(voice_state.voice_channel)
+				except:
+					ch_name="UNKNOWN"
+				log.warning("Cannot reconnect to channel {}: {}".format(ch_name, str(e)))
 
 	@commands.command(pass_context=True, no_pm=True, aliases=["summon"])
 	async def join(self, ctx, *, channel : discord.VoiceChannel=None):
