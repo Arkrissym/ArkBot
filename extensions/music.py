@@ -344,6 +344,9 @@ class Music:
 		if "entries" in info:
 			info=info['entries'][0]
 
+		if info is None:
+			return None
+
 		url=info['url']
 
 		is_twitch='twitch' in url
