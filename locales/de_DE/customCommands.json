@@ -5,12 +5,13 @@
   "add_text_command_brief": "Fügt einen Text-Command hinzu.",
   "add_text_command_help": "Fügt einen Text-Command hinzu.\nWenn <command> benutzt wird, dann wird der Bot mit <answer> antworten.",
   "add_music_command_brief": "Fügt einen \"Musik\"-Command hinzu.",
-  "add_music_command_help": "Fügt einen \"Musik\"-Command hinzu.\nWenn <command> benutzt wird, versucht der Bot deinem Voice-Channel zu joinen und <link_or_name> abzuspielen.\nAnschließend verlässt er den Channel wieder.",
+  "add_music_command_help": "Fügt einen \"Musik\"-Command hinzu.\nWenn <command> benutzt wird, versucht der Bot deinem Voice-Channel zu joinen und <link_or_name> bzw. den Anhang, der bei der Erstellung des Commands hochgeladen wurde, abzuspielen.\nAnschließend verlässt er den Channel wieder.",
   "join_channel": "Scheinbar bin ich gerade damit beschäftigt, in einem anderen Channel Musik zu spielen. Versuch es doch später nochmal!",
   "no_commands": "Dieser Server hat keine benutzerdefinierten Commands.",
   "add_command": "Command {} wurde hinzugefügt.",
-  "delete_commands": "Command {} wurde entfernt.",
+  "delete_command": "Command {} wurde entfernt.",
   "command_exists": "Command {} existiert bereits.",
   "command_doesnt_exist": "Command {} existiert nicht.",
-  "warn_live": "Livestreams können nicht in custom Commands benutzt werden."
+  "warn_live": "Livestreams können nicht in custom Commands benutzt werden.",
+  "no_audio_file_or_link": "Es wurde keine Audiodatei bzw. kein Link angegeben. Command wurde nicht erstellt."
 }

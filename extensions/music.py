@@ -516,7 +516,7 @@ class Music:
 		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.pause()
 
-	@commands.command(pass_context=True, no_pm=True, aliases=["continue"])
+	@commands.command(pass_context=True, no_pm=True, aliases=["continue", "unpause"])
 	async def resume(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:

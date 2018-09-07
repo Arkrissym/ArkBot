@@ -5,12 +5,13 @@
   "add_text_command_brief": "Adds a command that responds a text.",
   "add_text_command_help": "Adds a command that responds a text.\nWhen using <command> the bot will print <answer>.",
   "add_music_command_brief": "Adds a command that plays \"music\".",
-  "add_music_command_help": "Adds a command that plays \"music\".\nWhen using <command> the bot will try to join your voice channel and play <link_or_name>.",
+  "add_music_command_help": "Adds a command that plays \"music\".\nWhen using <command> the bot will try to join your voice channel and play <link_or_name> or the attachement given add at command creation.",
   "join_channel": "Seems like i am already playing audio in another channel. Please try again later.",
   "no_commands": "This server doesn't have any custom commands.",
   "add_command": "Command {} added.",
   "delete_command": "Command {} deleted.",
   "command_exists": "Command {} already exists.",
   "command_doesnt_exist": "Command {} doesn't exist.",
-  "warn_live": "Cannot use live streams in custom commands."
+  "warn_live": "Cannot use live streams in custom commands.",
+  "no_audio_file_or_link": "No audio file or link was given. Command not created."
 }
