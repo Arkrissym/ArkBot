@@ -29,6 +29,7 @@ import json
 import time
 import os
 import re
+import pathlib
 
 import dataBase
 import config
@@ -134,6 +135,8 @@ class LeagueOfLegends:
 				filename=filename.replace("&", "_")
 				filename=filename.replace("=", "_")
 				filename=filename.replace("?", "_")
+
+				pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 				with open(filename, 'w', encoding='utf-8') as file:
 					json.dump(data, file)
