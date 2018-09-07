@@ -341,6 +341,10 @@ class Music:
 
 		ytdl=youtube_dl.YoutubeDL(ytdl_opts)
 		info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, song_name, False)
+
+		if info is None:
+			return None
+
 		if "entries" in info:
 			info=info['entries'][0]
 
