@@ -387,13 +387,11 @@ class Music:
 		i=0
 		for name in song_names:
 			tmp=await self.play(ctx, name)
-			if tmp == None:
-				break
+			if tmp != None:
+				if i < 10:
+					embed.add_field(name=tmp.name, value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader), inline=False)
 
-			if i < 10:
-				embed.add_field(name=tmp.name, value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader), inline=False)
-
-			i=i+1
+				i=i+1
 
 		if i > 10:
 			embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(i - 10))
