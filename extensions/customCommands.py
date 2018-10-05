@@ -48,6 +48,14 @@ class CustomCommands:
 	def __init__(self, bot):
 		self.bot=bot
 		self.commands={}
+		self.voice_clients=set()
+
+	async def on_connect(self):
+		for vc in self.voice_clients:
+			try:
+				await vc.disconnect()
+			except Exception as e:
+				log.error("customCommands (on_connect) - cannot disconnect from voice: {}".format(str(e)))
 
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
@@ -196,6 +204,7 @@ class CustomCommands:
 					voice_client=None
 					try:
 						voice_client=await message.author.voice.channel.connect()
+						self.voice_clients.add(voice_client)
 					except discord.ClientException:
 						await message.channel.send(config.strings[config.getLocale(message.channel.guild.id)]['customCommands']['join_channel'])
 					else:
@@ -206,6 +215,7 @@ class CustomCommands:
 
 					if voice_client:
 						await voice_client.disconnect()
+						self.voice_clients.remove(voice_client)
 				elif all_commands[command]["type"] == "user_audio":
 					if str(message.guild.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
 						source='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(message.guild.id), command)
