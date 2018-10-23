@@ -75,7 +75,7 @@ class LeagueOfLegends:
 			endpoint="static-data"
 		elif name.startswith("lol/champion-mastery"):
 			endpoint="champion-mastery"
-		elif name.startswith("lol/platform/v3/champions"):
+		elif name.startswith("lol/platform/v3/champion"):
 			endpoint="champion"
 		elif name.startswith("lol/league"):
 			endpoint="league"
@@ -177,7 +177,7 @@ class LeagueOfLegends:
 
 	@commands.command(pass_context=True, no_pm=True)
 	async def getChampionRotation(self, ctx):
-		data=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/platform/v3/champions?freeToPlay=true")
+		data=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/platform/v3/champion-rotations")
 
 		locale=config.getLocale(ctx.guild.id)
 
@@ -191,9 +191,9 @@ class LeagueOfLegends:
 
 		embed=discord.Embed(title=config.strings[locale]["lolStat"]["championRotationTitle"])
 
-		for champion in data["champions"]:
+		for champion_id in data["freeChampionIds"]:
 			for name in allChampionData["data"]:
-				if int(allChampionData["data"][name]["key"]) == int(champion["id"]):
+				if int(allChampionData["data"][name]["key"]) == int(champion_id):
 					championData=allChampionData["data"][name]
 					break
 			
