@@ -32,5 +32,7 @@
   "mpregen": "Ressourcenpoolregeneration",
   "mpregenperlevel": "Ressourcenpoolregeneration pro Level",
   "spellblock": "Magieresistenz",
-  "spellblockperlevel": "Magieresistenz pro Level"
+  "spellblockperlevel": "Magieresistenz pro Level",
+  "allytips": "Tipps für Verbündete",
+  "enemytips": "Tipps für Gegner"
 }

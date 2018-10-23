@@ -146,7 +146,7 @@ class LeagueOfLegends:
 		return None
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getPlayerInfo(self, ctx, *, name : str):
+	async def player_info(self, ctx, *, name : str):
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
 
@@ -176,7 +176,7 @@ class LeagueOfLegends:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getChampionRotation(self, ctx):
+	async def champion_rotation(self, ctx):
 		data=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/platform/v3/champion-rotations")
 
 		locale=config.getLocale(ctx.guild.id)
@@ -206,7 +206,7 @@ class LeagueOfLegends:
 		await ctx.send(embed=embed)
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getChampionLore(self, ctx, *, championName : str):
+	async def champion_lore(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 
 		versions=await ctx.bot.loop.run_in_executor(None, self.getData, 'lol/static-data/api/versions')
@@ -237,7 +237,7 @@ class LeagueOfLegends:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
 	@commands.command(pass_context=True, no_pm=True)
-	async def getChampionStats(self, ctx, *, championName : str):
+	async def champion_stats(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 
 		versions=await ctx.bot.loop.run_in_executor(None, self.getData, 'lol/static-data/api/versions')
@@ -321,27 +321,39 @@ class LeagueOfLegends:
 		else:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
-#	@commands.command(pass_context=True, no_pm=True)
-#	async def champion_tips(self, ctx, *, championName : str):
-#		locale=config.getLocale(ctx.guild.id)
-#
-#		if locale in self.allowed_locales:
-#			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?locale={}&champListData=all&tags=all&dataById=true".format(locale))
-#		else:
-#			allChampionData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/v3/champions?&champListData=all&tags=all&dataById=true")
-#
-#		if allChampionData != None:
-#			version=allChampionData["version"]
-#
-#			for championKey in allChampionData["keys"]:
-#				championData=allChampionData["data"][str(championKey)]
-#				if championData["name"].lower() == championName.lower():
-#					embed=discord.Embed(title=championData["name"])
-#					embed.add_field(name=championData["title"], value=championData["tips"])	#TODO: get tips
-#					embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
-#					await ctx.send(embed=embed)
-#		else:
-#			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
+	@commands.command(pass_context=True, no_pm=True)
+	async def champion_tips(self, ctx, *, championName : str):
+		locale=config.getLocale(ctx.guild.id)
+
+		versions=await ctx.bot.loop.run_in_executor(None, self.getData, 'lol/static-data/api/versions')
+		version=versions["data"][0]
+
+		if locale in self.allowed_locales:
+			championData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/cdn/{}/data/{}/champion/{}".format(version, locale, championName))
+		else:
+			championData=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/static-data/cdn/{}/data/en_US/champion/{}".format(version, championName))
+
+		championData=championData["data"][championName]
+
+		if championData != None:
+			embed=discord.Embed(title=championData["name"])
+
+			tips=""
+			for tip in championData["allytips"]:
+				tips=tips+"\n\n"+tip
+			tips=re.sub(r"&nbsp;", " ", tips)
+			embed.add_field(name=config.strings[locale]['lolStat']['allytips'], value=tips)
+
+			tips=""
+			for tip in championData["enemytips"]:
+				tips=tips+"\n\n"+tip
+			tips=re.sub(r"&nbsp;", " ", tips)
+			embed.add_field(name=config.strings[locale]['lolStat']['enemytips'], value=tips)
+
+			embed.set_thumbnail(url='https://ddragon.leagueoflegends.com/cdn/{}/img/{}/{}'.format(version, championData["image"]["group"], championData["image"]["full"]))
+			await ctx.send(embed=embed)
+		else:
+			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
 def setup(bot):
 	bot.add_cog(LeagueOfLegends())

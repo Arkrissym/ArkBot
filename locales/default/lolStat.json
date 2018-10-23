@@ -32,5 +32,7 @@
   "mpregen": "Ressource Pool Regeneration",
   "mpregenperlevel": "Ressource Pool Regeneration per Level",
   "spellblock": "Magic Resistance",
-  "spellblockperlevel": "Magic Resistance per Level"
+  "spellblockperlevel": "Magic Resistance per Level",
+  "allytips": "Tips for Allys",
+  "enemytips": "Tips for Enemys"
 }
