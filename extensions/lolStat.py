@@ -311,6 +311,8 @@ class LeagueOfLegends:
 				spellText=re.sub(r"</?br */?>", "\n", spellText)
 				#spellText=re.sub(r"</?i>|</?mainText>|</?span[a-zA-Z0-9]*>", "", spellText)
 				spellText=re.sub(r"<.+?>", "", spellText)
+				spellText=re.sub(r"&nbsp;", " ", spellText)
+
 
 				embed.add_field(name=spell["name"], value=spellText, inline=False)
 
