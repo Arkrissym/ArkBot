@@ -169,7 +169,11 @@ class LeagueOfLegends:
 			league=self.getData('lol/league/v3/positions/by-summoner/{}'.format(data['id']))
 			if league != None:
 				for l in league['data']:
-					embed.add_field(name=config.strings[locale]['lolStat']['playerInfo_rank'], value='{} {}'.format(l['tier'], l['rank']))
+					try:
+						queueTypeName=config.strings['lolStat'][l['queueType']]
+					except:
+						queueTypeName=l['queueType']
+					embed.add_field(name=queueTypeName, value='{} {}'.format(l['tier'], l['rank']))
 
 			await ctx.send(embed=embed)
 		else:

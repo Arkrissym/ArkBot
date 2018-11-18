@@ -1,6 +1,8 @@
 {
   "playerInfo_level": "level:",
-  "playerInfo_rank": "rank:",
+  "RANKED_SOLO_5x5": "Solo/Duo",
+  "RANKED_TEAM_5x5": "Team 5x5",
+  "RANKED_TEAM_3x3": "Team 3x3",
   "lolStat_fail": "Failed to retrieve required information. Please try again later.",
   "championRotationTitle": "Current champion rotation",
   "Assassin": "Assassin",
