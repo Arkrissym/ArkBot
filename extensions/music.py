@@ -263,8 +263,8 @@ class Music:
 	#reconnect and resume all streams
 	async def on_ready(self):
 		log.info("(re)connected: reconnecting to voice channels")
-		for server in self.voice_states.keys():
-			voice_state=self.get_voice_state(server)
+		for server_id in self.voice_states.keys():
+			voice_state=self.voice_states[server_id]
 			try:
 				await voice_state.voice_client.disconnect()
 			except Exception as e:
