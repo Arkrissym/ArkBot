@@ -170,8 +170,9 @@ class LeagueOfLegends:
 			if league != None:
 				for l in league['data']:
 					try:
-						queueTypeName=config.strings['lolStat'][l['queueType']]
-					except:
+						queueTypeName=config.strings[locale]['lolStat'][l['queueType']]
+					except Exception as e:
+						log.error("Exception in player_info: " + str(e))
 						queueTypeName=l['queueType']
 					embed.add_field(name=queueTypeName, value='{} {}'.format(l['tier'], l['rank']))
 
