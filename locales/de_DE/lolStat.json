@@ -1,7 +1,7 @@
 {
   "playerInfo_level": "Level:",
   "RANKED_SOLO_5x5": "Solo/Duo",
-  "RANKED_FLEX_TT": "Flexi 5vs5",
+  "RANKED_FLEX_SR": "Flexi 5vs5",
   "RANKED_FLEX_TT": "Flexi 3vs3",
   "lolStat_fail": "Fehler beim abrufen der Informationen. Bitte versuche es später erneut",
   "championRotationTitle": "Aktuelle Championrotation",
