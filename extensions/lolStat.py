@@ -318,8 +318,14 @@ class LeagueOfLegends:
 				spellText=re.sub(r"<.+?>", "", spellText)
 				spellText=re.sub(r"&nbsp;", " ", spellText)
 
+				if len(spellText) == 0:
+					spellText=config.strings[locale]["lolStat"]["champion_data_no_description"]
 
-				embed.add_field(name=spell["name"], value=spellText, inline=False)
+				spellName=spell["name"]
+				if len(spellName) == 0:
+					spellName=config.strings[locale]["lolStat"]["champion_data_no_spell_name"]
+
+				embed.add_field(name=spellName, value=spellText, inline=False)
 
 			embed.set_footer(text=config.strings[locale]["lolStat"]["champion_data_disclaimer"])
 			await ctx.send(embed=embed)

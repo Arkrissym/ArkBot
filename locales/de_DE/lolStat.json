@@ -12,6 +12,8 @@
   "Support": "Supporter",
   "Tank": "Tank",
   "champion_data_disclaimer": "Info: Championdaten sind möglicherweise unvollständig.",
+  "champion_data_no_description": "Keine Beschreibung verfügbar. Danke für nichts Rito!",
+  "champion_data_no_spell_name": "Kein Name verfügbar.",
   "spelldamage": "Fähigkeitsstärke",
   "attackdamage": "Angriffsschaden",
   "bonusattackdamage": "zusätzlicher Angriffsschaden",

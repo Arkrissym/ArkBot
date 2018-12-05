@@ -12,6 +12,8 @@
   "Support": "Support",
   "Tank": "Tank",
   "champion_data_disclaimer": "Note: Championdata might be incomplete.",
+  "champion_data_no_description": "No description provided. Good job Rito!",
+  "champion_data_no_spell_name": "No spell name provided.",
   "spelldamage": "Ability Power",
   "attackdamage": "Attack Damage",
   "bonusattackdamage": "bonus Attack Damage",
