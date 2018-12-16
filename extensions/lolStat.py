@@ -150,7 +150,7 @@ class LeagueOfLegends:
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
 
-		data=await ctx.bot.loop.run_in_executor(None, self.getData, str('lol/summoner/v3/summoners/by-name/' + summoner))
+		data=await ctx.bot.loop.run_in_executor(None, self.getData, str('lol/summoner/v4/summoners/by-name/' + summoner))
 		versions=await ctx.bot.loop.run_in_executor(None, self.getData, 'lol/static-data/api/versions')
 
 		locale=config.getLocale(ctx.guild.id)
@@ -166,7 +166,7 @@ class LeagueOfLegends:
 
 			embed.add_field(name=config.strings[locale]['lolStat']['playerInfo_level'], value=level)
 
-			league=self.getData('lol/league/v3/positions/by-summoner/{}'.format(data['id']))
+			league=self.getData('lol/league/v4/positions/by-summoner/{}'.format(data['id']))
 			if league != None:
 				for l in league['data']:
 					try:
