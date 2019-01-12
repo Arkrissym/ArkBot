@@ -239,38 +239,10 @@ class Music:
 	def __init__(self, bot):
 		self.bot=bot
 		self.voice_states={}
-		self.cleanup_task=self.bot.loop.create_task(self.cleanup_task())
 
 		#fetch config from database
 		for g in bot.guilds:
 			getConfig(g.id)
-
-	async def cleanup_task(self):
-		log.info("starting cleanup_task")
-		while True:
-			play_times=dataBase.dump("music/play_times")
-			#print(play_times)
-			#print(time.time())
-
-			for song_id in play_times.keys():
-				last_play_time=play_times[song_id]
-				#print(song_id)
-				#print(last_play_time)
-				if (time.time() - 604800) > last_play_time:
-					try:
-						for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__))):
-							if f.startswith("{}_".format(song_id)):
-								break
-						filename='{}/../sounds/music/{}'.format(os.path.dirname(__file__), f)
-
-						os.remove(filename)
-						dataBase.deleteVal("music/play_times", song_id)
-						log.info("music.cleanup_task - deleted file (song_id: {}): {}".format(song_id, filename))
-					except Exception as e:
-						log.warning("music.cleanup_task - cannot delete file (song_id: {}): {}: {}".format(song_id, filename, str(e)))
-
-			#print("sleep")
-			await asyncio.sleep(3600)
 
 	def get_voice_state(self, server):
 		state=self.voice_states.get(server.id)
