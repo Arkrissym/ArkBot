@@ -92,30 +92,3 @@ def writeVal(prefix, valName, val):
 	except Exception as e:
 		log.error("dataBase - Cannot write data: " + str(e))
 		return 0
-
-def deleteVal(prefix, valName):
-	filename='dataBase/' + prefix + '.json'
-	filename=filename.replace("&", "_")
-	filename=filename.replace("=", "_")
-	filename=filename.replace("?", "_")
-	
-	pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
-
-	try:
-		with open(filename, 'r', encoding='utf-8') as file:
-			data={}
-			data=json.load(file)
-			file.close()
-	except FileNotFoundError:
-		data={}
-	except:
-		return 0
-
-	try:
-		with open(filename, 'w', encoding='utf-8') as file:
-			del data[valName]
-			json.dump(data, file)
-			return 1
-	except Exception as e:
-		log.error("dataBase - Cannot delete data: " + str(e))
-		return 0
