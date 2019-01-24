@@ -200,7 +200,7 @@ class VoiceState:
 					pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 				
 					args=["ffmpeg"]
-					args.extend(("-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
+					args.extend(("-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5", "-i", self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
 
 					download=True
 
@@ -210,7 +210,7 @@ class VoiceState:
 					dataBase.writeVal("music/play_times", self.current_song.id, time.time())
 				else:
 					log.info("music - streaming audio")
-					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3), after=self.play_next)
+					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url, before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', options='-loglevel warning'), volume=0.3), after=self.play_next)
 			else:
 				log.info("music - playing stored audio")
 				for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__))):
