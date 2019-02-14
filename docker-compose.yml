@@ -1,0 +1,27 @@
+version: '3'
+
+networks:
+  arkbot:
+    driver: bridge
+
+services:
+  bot:
+    build: .
+	restart: always
+	networks:
+	 - arkbot
+    environment:
+      DATABASE_URL: "postgres://arkbot:arkbot@db/arkbot"
+  db:
+    image: "bitnami/postgresql:latest"
+    restart: always
+	networks:
+	 - arkbot
+#    ports:
+#     - '5432:5432'
+#    volumes:
+#     - /storage/postgresql-persistance:/bitnami
+    environment:
+      POSTGRESQL_PASSWORD: "arkbot"
+      POSTGRESQL_USERNAME: "arkbot"
+      POSTGRESQL_DATABASE: "arkbot"
