@@ -7,16 +7,16 @@ networks:
 services:
   bot:
     build: .
-	restart: always
-	networks:
-	 - arkbot
+    restart: always
+    networks:
+     - arkbot
     environment:
       DATABASE_URL: "postgres://arkbot:arkbot@db/arkbot"
   db:
     image: "bitnami/postgresql:latest"
     restart: always
-	networks:
-	 - arkbot
+    networks:
+     - arkbot
 #    ports:
 #     - '5432:5432'
 #    volumes:
