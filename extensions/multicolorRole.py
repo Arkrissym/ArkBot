@@ -82,7 +82,7 @@ class MulticolorRole:
 			return [guild_id, self.config[str(guild_id)]["role_id"], self.config[str(guild_id)]["interval"]]
 
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
 			cur.execute(sql.SQL("SELECT * FROM multicolor_config WHERE id = %s"), [str(guild_id)])
 
@@ -105,7 +105,7 @@ class MulticolorRole:
 
 	def setConfig(self, guild_id, role_id, interval):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor()
 
 			old = self.getConfig(guild_id)
@@ -128,7 +128,7 @@ class MulticolorRole:
 
 	def deleteConfig(self, guild_id):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("DELETE FROM multicolor_config WHERE id = %s"), [str(guild_id)])

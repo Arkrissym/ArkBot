@@ -55,7 +55,7 @@ def getConfig(id):
 		return [id, _config[str(id)]["queue_mode"], _config[str(id)]["loop"]]
 
 	try:
-		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 		cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
 		cur.execute(sql.SQL("SELECT * FROM music_config WHERE id = %s"), [str(id)])
 
@@ -78,7 +78,7 @@ def getConfig(id):
 
 def setConfig(id, queue_mode, loop):
 	try:
-		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 		cur=conn.cursor()
 
 		old = getConfig(id)

@@ -84,7 +84,7 @@ def sqlReadConfig(id):
 	if str(id) in guild_config.keys():
 		return [id, guild_config[str(id)]["prefix"], guild_config[str(id)]["locale"]]
 
-	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+	conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 	cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
 	cur.execute(sql.SQL("SELECT * FROM config WHERE id = %s"), [str(id)])
 
@@ -104,7 +104,7 @@ def sqlReadConfig(id):
 
 def sqlSaveConfig(id, prefix, locale):
 	try:
-		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+		conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 		cur=conn.cursor()
 
 		old = sqlReadConfig(id)

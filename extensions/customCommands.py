@@ -103,7 +103,7 @@ class CustomCommands:
 			return self.commands[str(guild_id)]
 
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
 			cur.execute(sql.SQL("SELECT * FROM customCommands WHERE id = %s"), [str(guild_id)])
 
@@ -127,7 +127,7 @@ class CustomCommands:
 
 	def addCommand(self, guild_id, command, type, result):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"), [str(guild_id), str(command), str(type), str(result)])
@@ -154,7 +154,7 @@ class CustomCommands:
 
 	def deleteCommand(self, guild_id, command):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="require")
+			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
 			cur=conn.cursor()
 
 			cur.execute(sql.SQL("DELETE FROM customCommands WHERE id = %s AND command = %s"), [str(guild_id), str(command)])
