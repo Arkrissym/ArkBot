@@ -28,8 +28,8 @@ from faker import Faker
 from faker.config import AVAILABLE_LOCALES
 import config
 
-class Nickname:
-	@commands.command(pass_context=True, no_pm=True)
+class Nickname(commands.Cog):
+	@commands.command(no_pm=True)
 	async def randomnick(self, ctx):
 		locale=config.getLocale(ctx.guild.id)
 		if locale in AVAILABLE_LOCALES:
@@ -37,14 +37,14 @@ class Nickname:
 		else:
 			await ctx.author.edit(nick=Faker().name())
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def setnick(self, ctx, *, newNick : str=None):
 		if newNick:
 			await ctx.author.edit(nick=newNick)
 		else:
 			await ctx.author.edit(nick=config.strings[config.getLocale(ctx.guild.id)]['nickName']['idiot'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def idiot(self, ctx):
 		await ctx.author.edit(nick=config.strings[config.getLocale(ctx.guild.id)]['nickName']['idiot'])
 

@@ -235,7 +235,7 @@ class VoiceState:
 				else:
 					log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid, proc.returncode)
 
-class Music:
+class Music(commands.Cog):
 	def __init__(self, bot):
 		self.bot=bot
 		self.voice_states={}
@@ -289,6 +289,7 @@ class Music:
 #				pass
 
 	#reconnect and resume all streams
+	@commands.Cog.listener()
 	async def on_ready(self):
 		log.info("(re)connected: reconnecting to voice channels")
 		for server_id in self.voice_states.keys():
@@ -312,7 +313,7 @@ class Music:
 					ch_name="UNKNOWN"
 				log.warning("Cannot reconnect to channel {}: {}".format(ch_name, str(e)))
 
-	@commands.command(pass_context=True, no_pm=True, aliases=["summon"])
+	@commands.command(no_pm=True, aliases=["summon"])
 	async def join(self, ctx, *, channel : discord.VoiceChannel=None):
 		if channel == None:
 			if ctx.message.author.voice == None:
@@ -411,7 +412,7 @@ class Music:
 
 		return entry
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def playlist(self, ctx, *song_names : str):
 		locale=config.getLocale(ctx.guild.id)
 
@@ -430,7 +431,7 @@ class Music:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def playsong(self, ctx, *, song_name : str):
 		tmp=await self.play(ctx, song_name)
 		if tmp == None:
@@ -443,7 +444,7 @@ class Music:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True, help="music+playytlist_description")
+	@commands.command(no_pm=True, help="music+playytlist_description")
 	async def playytlist(self, ctx, *, playlist_link : str):
 		locale=config.getLocale(ctx.guild.id)
 
@@ -531,31 +532,31 @@ class Music:
 		else:
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
 
-	@commands.command(pass_context=True, no_pm=True, aliases=["quit", "leave"])
+	@commands.command(no_pm=True, aliases=["quit", "leave"])
 	async def stop(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (len(discord.utils.get(ctx.guild.voice_channels, id=state.voice_channel.id).members) == 1)):
 			await state.stop()
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def skip(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.skip()
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def pause(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.pause()
 
-	@commands.command(pass_context=True, no_pm=True, aliases=["continue", "unpause"])
+	@commands.command(no_pm=True, aliases=["continue", "unpause"])
 	async def resume(self, ctx):
 		state=self.get_voice_state(ctx.message.guild)
 		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
 			state.resume()
 
-	@commands.command(pass_context=True, no_pm=True, aliases=['np', 'current'])
+	@commands.command(no_pm=True, aliases=['np', 'current'])
 	async def nowplaying(self, ctx):
 		voice_state=self.get_voice_state(ctx.message.guild)
 		locale=config.getLocale(ctx.guild.id)
@@ -571,7 +572,7 @@ class Music:
 				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def loop(self, ctx, mode : str=None):
 		if mode:
 			mode=mode.lower()
@@ -588,7 +589,7 @@ class Music:
 			else:
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_off'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def queue_mode(self, ctx, mode : str=None):
 		if mode:
 			mode=mode.lower()
@@ -605,7 +606,7 @@ class Music:
 			else:
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_random'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def repeat(self, ctx):
 		voice_state=self.get_voice_state(ctx.message.guild)
 
@@ -642,7 +643,7 @@ class Music:
 
 			await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def queue(self, ctx):
 		voice_state=self.get_voice_state(ctx.message.guild)
 		songs=asyncio.Queue()

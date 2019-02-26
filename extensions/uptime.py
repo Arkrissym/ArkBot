@@ -24,11 +24,11 @@ from discord.ext import commands
 import time
 import config
 
-class Uptime:
+class Uptime(commands.Cog):
 	def __init__(self):
 		self.startTime=time.time()
 
-	@commands.command(pass_context=True)
+	@commands.command()
 	async def uptime(self, ctx):
 		locale=config.getLocale(ctx.guild.id)
 

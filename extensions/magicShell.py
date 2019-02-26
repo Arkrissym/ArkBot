@@ -39,11 +39,11 @@ if not discord.opus.is_loaded():
 		except:
 			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
 
-class MagicShell:
+class MagicShell(commands.Cog):
 	def __init__(self, bot):
 		self.bot=bot
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def shell(self, ctx, *, question : str):
 		if ctx.message.author.voice.channel == None:
 			return

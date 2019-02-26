@@ -44,12 +44,13 @@ if not discord.opus.is_loaded():
 		except:
 			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
 
-class CustomCommands:
+class CustomCommands(commands.Cog):
 	def __init__(self, bot):
 		self.bot=bot
 		self.commands={}
 		self.voice_clients=set()
 
+	@commands.Cog.listener()
 	async def on_connect(self):
 		for vc in self.voice_clients:
 			try:
@@ -57,6 +58,7 @@ class CustomCommands:
 			except Exception as e:
 				log.error("customCommands (on_connect) - cannot disconnect from voice: {}".format(str(e)))
 
+	@commands.Cog.listener()
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
 			for g in self.bot.guilds:
@@ -168,6 +170,7 @@ class CustomCommands:
 
 		del self.commands[str(guild_id)][str(command)]
 
+	@commands.Cog.listener()
 	async def on_message(self, message):
 		if message.author.bot or message.guild == None or message.content.startswith(config.getPrefix(message.guild.id)) == False:
 			return
@@ -238,7 +241,7 @@ class CustomCommands:
 				else: #text
 					await message.channel.send(all_commands[command]["result"])
 
-	@commands.command(pass_context=True, no_pm=True, help="customCommands+list_commands_help")
+	@commands.command(no_pm=True, help="customCommands+list_commands_help")
 	async def list_commands(self, ctx):
 		text=""
 		for command_name in self.getCommands(ctx.guild.id).keys():
@@ -251,7 +254,7 @@ class CustomCommands:
 		embed=discord.Embed(description=text)
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True, brief="customCommands+delete_command_brief", help="customCommands+delete_command_help")
+	@commands.command(no_pm=True, brief="customCommands+delete_command_brief", help="customCommands+delete_command_help")
 	@config.is_admin_or_owner()
 	async def delete_command(self, ctx, command : str):
 		if not command in self.getCommands(ctx.guild.id).keys():
@@ -267,7 +270,7 @@ class CustomCommands:
 
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['delete_command'].format(command))
 
-	@commands.command(pass_context=True, no_pm=True, brief="customCommands+add_text_command_brief", help="customCommands+add_text_command_help")
+	@commands.command(no_pm=True, brief="customCommands+add_text_command_brief", help="customCommands+add_text_command_help")
 	@config.is_admin_or_owner()
 	async def add_text_command(self, ctx, command : str, *, answer : str):
 		if command in self.getCommands(ctx.guild.id).keys():
@@ -277,7 +280,7 @@ class CustomCommands:
 		await ctx.bot.loop.run_in_executor(None, self.addCommand, ctx.guild.id, command, "text", answer)
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['add_command'].format(command))
 
-	@commands.command(pass_context=True, no_pm=True, brief="customCommands+add_music_command_brief", help="customCommands+add_music_command_help")
+	@commands.command(no_pm=True, brief="customCommands+add_music_command_brief", help="customCommands+add_music_command_help")
 	@config.is_admin_or_owner()
 	async def add_music_command(self, ctx, command : str, *, link_or_name : str = None):
 		locale=config.getLocale(ctx.guild.id)

@@ -24,12 +24,13 @@ from discord.ext import commands
 import random
 import config
 
-class Time:
-	@commands.command(pass_context=True)
+class Time(commands.Cog):
+	@commands.command()
 	async def time(self, ctx):
 		list=config.strings[config.getLocale(ctx.guild.id)]['zeit']['time_answers']
 		await ctx.send(list[random.randint(0, len(list) - 1)])
 
+	@commands.Cog.listener()
 	async def on_message(self, message):
 		if message.guild:
 			locale=config.getLocale(message.guild.id)

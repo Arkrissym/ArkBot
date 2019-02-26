@@ -25,11 +25,11 @@ import discord
 import config
 from logger import logger
 
-class TestModule:
+class TestModule(commands.Cog):
 	def __init__(self, bot):
 		self.bot=bot
 
-	@commands.command(pass_context=True)
+	@commands.command()
 	async def test(self, ctx):
 		counter=0
 
@@ -51,11 +51,11 @@ class TestModule:
 
 		await tmp.edit(content=config.strings[locale]['testModule']['sum_messages'].format(counter))
 
-	@commands.command(pass_context=True, help="echo_help", usage="<string>", brief="testModule+echo_brief")
+	@commands.command(help="echo_help", usage="<string>", brief="testModule+echo_brief")
 	async def echo(self, ctx, *, string : str):
 		await ctx.send(string)
 
-	@commands.command(pass_context=True, brief="Send an Embed.")
+	@commands.command(brief="Send an Embed.")
 	async def embed(self, ctx):
 		embed=discord.Embed(title='Title', description='description', color=0x00ff00)
 		embed.set_thumbnail(url='https://cdn.pixabay.com/photo/2016/02/22/00/25/robot-1214536_960_720.png')
@@ -69,10 +69,11 @@ class TestModule:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True)
+	@commands.command()
 	async def prefix(self, ctx):
 		await ctx.send(ctx.prefix)
 
+	@commands.Cog.listener()
 	async def on_message(self, message):
 	#check, if message has been sent by a bot
 		if message.author.bot:

@@ -1,11 +1,13 @@
 import googletrans
 import discord
+from discord.ext import commands
 import re
 import unicodedata
 import pycountry
 from babel import Locale
 
-class Translator:
+class Translator(commands.Cog):
+	@commands.Cog.listener()
 	async def on_reaction_add(self, reaction, user):
 		if isinstance(reaction.emoji, discord.Emoji):
 			name=reaction.emoji.name

@@ -35,7 +35,7 @@ import dataBase
 import config
 from logger import logger as log
 
-class LeagueOfLegends:
+class LeagueOfLegends(commands.Cog):
 	def __init__(self):
 		self.retry_after={
 				"static-data" : time.time(),
@@ -145,7 +145,7 @@ class LeagueOfLegends:
 
 		return None
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def player_info(self, ctx, *, name : str):
 		summoner=name
 		summoner=urllib.request.quote(summoner, safe=':/')
@@ -180,7 +180,7 @@ class LeagueOfLegends:
 		else:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def champion_rotation(self, ctx):
 		data=await ctx.bot.loop.run_in_executor(None, self.getData, "lol/platform/v3/champion-rotations")
 
@@ -210,7 +210,7 @@ class LeagueOfLegends:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def champion_lore(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 
@@ -241,7 +241,7 @@ class LeagueOfLegends:
 		else:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def champion_stats(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 
@@ -332,7 +332,7 @@ class LeagueOfLegends:
 		else:
 			await ctx.send(config.strings[locale]['lolStat']['lolStat_fail'])
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	async def champion_tips(self, ctx, *, championName : str):
 		locale=config.getLocale(ctx.guild.id)
 

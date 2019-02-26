@@ -152,16 +152,17 @@ def getLocale(guild_id):
 
 def is_admin_or_owner():
 	async def predicate(ctx):
+		print("check is_admin_or_owner")
 		permissions=ctx.channel.permissions_for(ctx.author)
 		return await ctx.bot.is_owner(ctx.author) or permissions.administrator
 
 	return commands.check(predicate)
 
-class Config:
+class Config(commands.Cog):
 	def __init__(self, bot):
 		self.bot=bot
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	@is_admin_or_owner()
 	async def list_locales(self, ctx):
 		text=str()
@@ -172,7 +173,7 @@ class Config:
 
 		await ctx.send(embed=embed)
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	@is_admin_or_owner()
 	async def set_locale(self, ctx, *, locale : str):
 		locale_avail=False
@@ -188,7 +189,7 @@ class Config:
 		else:
 			await ctx.send(strings[getLocale(ctx.guild.id)]['config']['locale_not_found'].format(locale))
 
-	@commands.command(pass_context=True, no_pm=True)
+	@commands.command(no_pm=True)
 	@is_admin_or_owner()
 	async def set_prefix(self, ctx, prefix : str):
 		if len(prefix) == 0 or len(prefix) > 5 or prefix.startswith("@") or prefix.startswith("#"):

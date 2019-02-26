@@ -27,8 +27,8 @@ import asyncio
 
 import config
 
-class ClearHistory:
-	@commands.command(pass_context=True, no_pm=True)
+class ClearHistory(commands.Cog):
+	@commands.command(no_pm=True)
 	@commands.has_permissions(manage_messages=True)
 	async def clearlog(self, ctx):
 		prefix=config.getPrefix(ctx.guild.id)
@@ -49,7 +49,7 @@ class ClearHistory:
 		if len(msgs) > 0:
 			await ctx.message.channel.delete_messages(msgs)
 
-	@commands.command(pass_context=True, no_pm=True, description='tabularasa protocol')
+	@commands.command(no_pm=True, description='tabularasa protocol')
 	@config.is_admin_or_owner()
 	async def tabularasa(self, ctx):
 		async for log in ctx.message.channel.history(limit=None):
