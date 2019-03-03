@@ -63,7 +63,14 @@ class CustomCommands(commands.Cog):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
 			for g in self.bot.guilds:
 #				log.info("checking guild: " + str(g))
-				all_commands=self.getCommands(g.id)
+				all_commands={}
+				tries=0
+				while all_commands == {} and tries < 24:
+					all_commands=self.getCommands(g.id)
+					if all_commands == {}:
+						tries=tries+1
+						asyncio.sleep(5)
+					
 				for command in all_commands.keys():
 					try:
 						if all_commands[command]["type"] == "music" and not str(g.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
@@ -213,7 +220,7 @@ class CustomCommands(commands.Cog):
 					else:
 						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'), volume=0.8))
 						while voice_client.is_playing():
-							await asyncio.sleep(0.1)
+							await asyncio.sleep(0.2)
 						await asyncio.sleep(1)
 
 					if voice_client:
