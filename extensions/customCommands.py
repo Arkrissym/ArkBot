@@ -61,6 +61,8 @@ class CustomCommands(commands.Cog):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
+			pathlib.Path("{}/../sounds/customCommands".format(os.path.dirname(__file__))).mkdir(parents=True, exist_ok=True)
+
 			for g in self.bot.guilds:
 #				log.info("checking guild: " + str(g))
 				all_commands={}
