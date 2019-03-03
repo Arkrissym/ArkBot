@@ -174,7 +174,7 @@ class LeagueOfLegends(commands.Cog):
 					except Exception as e:
 						log.error("Exception in player_info: " + str(e))
 						queueTypeName=l['queueType']
-					embed.add_field(name=queueTypeName, value='{} {}'.format(l['tier'], l['rank']))
+					embed.add_field(name=queueTypeName, value='{} {} ({})'.format(l['tier'], l['rank'], l['leagueName']))
 
 			await ctx.send(embed=embed)
 		else:
