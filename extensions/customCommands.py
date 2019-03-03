@@ -65,11 +65,11 @@ class CustomCommands(commands.Cog):
 #				log.info("checking guild: " + str(g))
 				all_commands={}
 				tries=0
-				while all_commands == {} and tries < 24:
+				while all_commands == {} and tries < 30:
 					all_commands=self.getCommands(g.id)
 					if all_commands == {}:
 						tries=tries+1
-						asyncio.sleep(5)
+						await asyncio.sleep(10)
 					
 				for command in all_commands.keys():
 					try:
