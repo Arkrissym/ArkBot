@@ -5,13 +5,6 @@ networks:
     driver: bridge
 
 services:
-  bot:
-    build: .
-    restart: always
-    networks:
-     - arkbot
-    environment:
-      DATABASE_URL: "postgres://arkbot:arkbot@db/arkbot"
   db:
     image: "bitnami/postgresql:latest"
     restart: always
@@ -25,3 +18,12 @@ services:
       POSTGRESQL_PASSWORD: "arkbot"
       POSTGRESQL_USERNAME: "arkbot"
       POSTGRESQL_DATABASE: "arkbot"
+  bot:
+    build: .
+    restart: always
+    networks:
+     - arkbot
+    environment:
+      DATABASE_URL: "postgres://arkbot:arkbot@db/arkbot"
+    depends_on:
+      db
