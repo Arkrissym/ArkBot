@@ -33,113 +33,7 @@ from logger import logger
 import config
 import dataBase
 
-class myHelpFormatter(discord.ext.commands.HelpFormatter):
-	def _add_subcommands_to_page(self, max_width, commands):
-		locale=config.getLocale(self.context.guild.id)
-
-		for name, command in commands:
-			if name in command.aliases:
-				# skip aliases
-				continue
-
-			short_doc=command.short_doc
-
-			try:
-				module_name=short_doc.split("+")[0]
-				string_name=short_doc.split("+")[1]
-				#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
-				short_doc=config.strings[locale][module_name][string_name]
-			except:
-				pass
-
-			#print(short_doc)
-
-			entry = '  {0:<{width}} {1}'.format(name, short_doc, width=max_width)
-			shortened = self.shorten(entry)
-			self._paginator.add_line(shortened)
-
-	async def format(self):
-		#print("format")
-
-		locale=config.getLocale(self.context.guild.id)
-
-		self._paginator = discord.ext.commands.Paginator()
-
-		# we need a padding of ~80 or so
-
-		description = self.command.description if not self.is_cog() else inspect.getdoc(self.command)
-
-		if description:
-			try:
-				module_name=description.split("+")[0]
-				string_name=description.split("+")[1]
-				#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
-				description=config.strings[locale][module_name][string_name]
-			except:
-				pass
-
-			# <description> portion
-			self._paginator.add_line(description, empty=True)
-			#print(description)
-
-		if isinstance(self.command, discord.ext.commands.Command):
-			# <signature portion>
-			signature = self.get_command_signature()
-			self._paginator.add_line(signature, empty=True)
-			#print("signature: " + signature)
-
-			# <long doc> section
-			if self.command.help:
-				cmd_help=self.command.help
-
-				try:
-					module_name=cmd_help.split("+")[0]
-					string_name=cmd_help.split("+")[1]
-					#if module_name in config.strings[locale].keys() and string_name in config.strings[locale][module_name].keys():
-					cmd_help=config.strings[locale][module_name][string_name]
-				except:
-					pass
-				self._paginator.add_line(cmd_help, empty=True)
-				#print(cmd_help)
-
-			# end it here if it's just a regular command
-			if not self.has_subcommands():
-				self._paginator.close_page()
-				return self._paginator.pages
-
-		max_width = self.max_name_size
-
-		def category(tup):
-			cog = tup[1].cog_name
-			# we insert the zero width space there to give it approximate
-			# last place sorting position.
-			return cog + ':' if cog is not None else '\u200bNo Category:'
-
-		filtered = await self.filter_command_list()
-		if self.is_bot():
-			data = sorted(filtered, key=category)
-			for category, commands in itertools.groupby(data, key=category):
-				# there simply is no prettier way of doing this.
-				commands = sorted(commands)
-				if len(commands) > 0:
-					self._paginator.add_line(category)
-
-				#print(category)
-				#print(commands)
-				self._add_subcommands_to_page(max_width, commands)
-		else:
-			filtered = sorted(filtered)
-			if filtered:
-				self._paginator.add_line('Commands:')
-				self._add_subcommands_to_page(max_width, filtered)
-
-		# add the ending note
-		self._paginator.add_line()
-		ending_note = self.get_ending_note()
-		self._paginator.add_line(ending_note)
-		return self._paginator.pages
-
-async def guild_prefix(bot, message):
+async def get_prefix(bot, message):
 	r=list()
 	if message.guild != None:
 		r.extend([config.getPrefix(message.guild.id)])
@@ -149,7 +43,75 @@ async def guild_prefix(bot, message):
 
 	return r
 
-bot=commands.AutoShardedBot(command_prefix=guild_prefix, formatter=myHelpFormatter())
+class MyHelpCommand(commands.DefaultHelpCommand):
+	def command_not_found(self, string):
+		locale=config.getLocale(self.context.guild.id)
+		return config.strings[locale]["bot"]["command_not_found"].format(string)
+
+	def subcommand_not_found(self, command, string):
+		locale=config.getLocale(self.context.guild.id)
+		if isinstance(command, commands.Group) and len(command.all_commands) > 0:
+			return config.strings[locale]["bot"]["sub_command_not_found_1"].format(command, string)
+		return config.strings[locale]["bot"]["sub_command_not_found_2"].format(command)
+
+	def get_ending_note(self):
+		locale=config.getLocale(self.context.guild.id)
+		command_name = self.context.invoked_with
+		return config.strings[locale]["bot"]["help_command_ending_note"].format(self.clean_prefix, command_name)
+
+	def add_indented_commands(self, commands, *, heading, max_size=None):
+		if not commands:
+			return
+
+		locale=config.getLocale(self.context.guild.id)
+
+		self.paginator.add_line(heading)
+		max_size = max_size or self.get_max_size(commands)
+
+		get_width = discord.utils._string_width
+		for command in commands:
+			name = command.name
+			width = max_size - (get_width(name) - len(name))
+
+			short_doc=command.short_doc
+			try:
+				module_name=short_doc.split("+")[0]
+				string_name=short_doc.split("+")[1]
+				short_doc=config.strings[locale][module_name][string_name]
+			except:
+				pass
+
+			entry = '{0}{1:<{width}} {2}'.format(self.indent * ' ', name, short_doc, width=width)
+			self.paginator.add_line(self.shorten_text(entry))
+
+	def add_command_formatting(self, command):
+		locale=config.getLocale(self.context.guild.id)
+
+		if command.description:
+			description=command.description
+			try:
+				module_name=short_doc.split("+")[0]
+				string_name=short_doc.split("+")[1]
+				description=config.strings[locale][module_name][string_name]
+			except:
+				pass
+			self.paginator.add_line(description, empty=True)
+
+		signature = self.get_command_signature(command)
+		self.paginator.add_line(signature, empty=True)
+
+		if command.help:
+			help=command.help
+			try:
+				module_name=short_doc.split("+")[0]
+				string_name=short_doc.split("+")[1]
+				help=config.strings[locale][module_name][string_name]
+			except:
+				pass
+			self.paginator.add_line(help, empty=True)
+
+
+bot=commands.AutoShardedBot(command_prefix=get_prefix, help_command=MyHelpCommand())
 
 @bot.event
 async def on_ready():

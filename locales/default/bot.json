@@ -1,10 +1,14 @@
 {
-"member_join_msg" : [
-	"Welcome on this server {}."
-        ],
-"member_remove_msg" : [
-	"{} left the server"
-	],
-"member_ban_msg" : "{} is now banned from this server.",
-"member_unban_msg" : "{} has been unbanned."
+  "member_join_msg": [
+    "Welcome on this server {}."
+  ],
+  "member_remove_msg": [
+    "{} left the server"
+  ],
+  "member_ban_msg": "{} is now banned from this server.",
+  "member_unban_msg": "{} has been unbanned.",
+  "command_not_found": "No command called {} found.",
+  "sub_command_not_found_1": "Command \"{0.qualified_name}\" has no subcommand called {1}.",
+  "sub_command_not_found_2": "Command \"{0.qualified_name}\" has no subcommands.",
+  "help_command_ending_note": "Type {0}{1} command for more info on a command.\nYou can also type {0}{1} category for more info on a category."
 }

@@ -1,12 +1,16 @@
 {
-"member_join_msg" : [
-	"Willkommen {}. Denk immer dran: nachts ist es kälter als draußen",
-	"Willkommen {}. Denk immer dran: Pommes schmecken besser als mit Ketchup."
-	],
-"member_remove_msg" : [
-	"{} ist abgedampft. OK Tschüüüüüüsss!",
-	"{} hat n Abgang gemacht."
-	],
-"member_ban_msg" : "{} wurde gebannt.",
-"member_unban_msg" : "{} wurde entbannt."
+  "member_join_msg": [
+    "Willkommen {}. Denk immer dran: nachts ist es kälter als draußen",
+    "Willkommen {}. Denk immer dran: Pommes schmecken besser als mit Ketchup."
+  ],
+  "member_remove_msg": [
+    "{} ist abgedampft. OK Tschüüüüüüsss!",
+    "{} hat n Abgang gemacht."
+  ],
+  "member_ban_msg": "{} wurde gebannt.",
+  "member_unban_msg": "{} wurde entbannt.",
+  "command_not_found": "Command {} nicht gefunden.",
+  "sub_command_not_found_1": "{1} ist kein Subcommand von \"{0.qualified_name}\".",
+  "sub_command_not_found_2": "Command \"{0.qualified_name}\" hat keine Subcommands.",
+  "help_command_ending_note": "Benutze {0}{1} <Command> für weitere Informationen über <Command>.\nBenutze {0}{1} <Kategorie> für Informationen über eine Kategorie."
 }

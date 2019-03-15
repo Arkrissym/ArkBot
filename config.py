@@ -152,7 +152,6 @@ def getLocale(guild_id):
 
 def is_admin_or_owner():
 	async def predicate(ctx):
-		print("check is_admin_or_owner")
 		permissions=ctx.channel.permissions_for(ctx.author)
 		return await ctx.bot.is_owner(ctx.author) or permissions.administrator
 
