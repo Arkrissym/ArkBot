@@ -380,35 +380,38 @@ class Music(commands.Cog):
 		if info is None:
 			return None
 
-		url=info['url']
+		try:
+			url=info['url']
 
-		is_twitch='twitch' in url
-		if is_twitch:
-			song_name=info['description']
-		else:
-			song_name=info['title']
+			is_twitch='twitch' in url
+			if is_twitch:
+				song_name=info['description']
+			else:
+				song_name=info['title']
 
-		if 'thumbnail' in info:
-			thumbnail_url=info['thumbnail']
-		else:
-			thumbnail_url=None
+			if 'thumbnail' in info:
+				thumbnail_url=info['thumbnail']
+			else:
+				thumbnail_url=None
 
-		if 'uploader' in info:
-			uploader=info['uploader']
-		else:
-			uploader='Unknown'
+			if 'uploader' in info:
+				uploader=info['uploader']
+			else:
+				uploader='Unknown'
 
-		if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
-			id=info['id']
-		else:
-			id=None
+			if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
+				id=info['id']
+			else:
+				id=None
 
-		entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
+			entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
 
-		if getQueueMode(ctx.guild.id) == 'random' and len(voice_state.songs) > 1:
-			voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), entry)
-		else:
-			voice_state.songs.append(entry)
+			if getQueueMode(ctx.guild.id) == 'random' and len(voice_state.songs) > 1:
+				voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), entry)
+			else:
+				voice_state.songs.append(entry)
+		except:
+			return None
 
 		return entry
 
@@ -494,41 +497,42 @@ class Music(commands.Cog):
 			for entry in list(info['entries']):
 				try:
 					url=entry['url']
+				
+					is_twitch='twitch' in url
+					if is_twitch:
+						song_name=entry['description']
+					else:
+						song_name=entry['title']
+
+					if 'thumbnail' in entry:
+						thumbnail_url=entry['thumbnail']
+					else:
+						thumbnail_url=None
+
+					if 'uploader' in entry:
+						uploader=entry['uploader']
+					else:
+						uploader=None
+
+					if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
+						id=info['id']
+					else:
+						id=None
+
+					if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
+						await ctx.send(config.strings[locale]['music']['queue_full'])
+						return
+
+					song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
+
+					if queue_mode == 'random' and len(voice_state.songs) > 1:
+						voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), song_entry)
+					else:
+						voice_state.songs.append(song_entry)
+
 				except:
 					log.debug('playytlist: skipping unavailable song')
 					continue
-
-				is_twitch='twitch' in url
-				if is_twitch:
-					song_name=entry['description']
-				else:
-					song_name=entry['title']
-
-				if 'thumbnail' in entry:
-					thumbnail_url=entry['thumbnail']
-				else:
-					thumbnail_url=None
-
-				if 'uploader' in entry:
-					uploader=entry['uploader']
-				else:
-					uploader=None
-
-				if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
-					id=info['id']
-				else:
-					id=None
-
-				if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
-					await ctx.send(config.strings[locale]['music']['queue_full'])
-					return
-
-				song_entry=VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
-
-				if queue_mode == 'random' and len(voice_state.songs) > 1:
-					voice_state.songs.insert(random.randint(0, len(voice_state.songs)-1), song_entry)
-				else:
-					voice_state.songs.append(song_entry)
 		else:
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
 
