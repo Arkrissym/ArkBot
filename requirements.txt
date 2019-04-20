@@ -1,5 +1,4 @@
-discord.py
-pynacl
+discord.py[voice]
 faker
 youtube_dl
 googletrans
