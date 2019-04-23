@@ -166,7 +166,7 @@ class LeagueOfLegends(commands.Cog):
 
 			embed.add_field(name=config.strings[locale]['lolStat']['playerInfo_level'], value=level)
 
-			league=self.getData('lol/league/v4/positions/by-summoner/{}'.format(data['id']))
+			league=self.getData('lol/league/v4/entries/by-summoner/{}'.format(data['id']))
 			if league != None:
 				for l in league['data']:
 					try:
@@ -174,7 +174,7 @@ class LeagueOfLegends(commands.Cog):
 					except Exception as e:
 						log.error("Exception in player_info: " + str(e))
 						queueTypeName=l['queueType']
-					embed.add_field(name=queueTypeName, value='{} {} ({})'.format(l['tier'], l['rank'], l['leagueName']))
+					embed.add_field(name=queueTypeName, value='{} {} ({}LP)'.format(l['tier'], l['rank'], l['leaguePoints']))
 
 			await ctx.send(embed=embed)
 		else:
