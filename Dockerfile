@@ -27,7 +27,8 @@ RUN apt-get update && apt-get install -y \
 	yasm \
 	libgl1-mesa-glx \
 	libxdamage1 \
-	libxfixes3
+	libxfixes3 \
+	libxml2-dev
 
 WORKDIR /ffmpeg
 RUN wget -q -O ffmpeg-snapshot.tar.bz2 http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2
@@ -45,7 +46,8 @@ RUN ./configure \
 	--enable-libx264 \
 	--enable-libx265 \
 	--enable-nonfree \
-	--enable-openssl
+	--enable-openssl \
+	--enable-libxml2
 RUN make -j4
 RUN make install
 
@@ -76,7 +78,8 @@ RUN apt-get update && apt-get install -y \
 	libva1 \
 	libva-drm1 \
 	libvdpau1 \
-	libxv1
+	libxv1 \
+	libxml2
 
 RUN pip install -r requirements.txt
   
