@@ -306,7 +306,6 @@ class Music(commands.Cog):
 				if voice_state.voice_channel:
 					voice_state.voice_client=await voice_state.voice_channel.connect()
 			except Exception as e:
-#				pass
 				try:
 					ch_name=str(voice_state.voice_channel)
 				except:
@@ -348,15 +347,8 @@ class Music(commands.Cog):
 		else:
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_success'].format(channel.name))
 
-	async def play(self, ctx, song_name):
+	async def _playsong(self, ctx, song_name):
 		voice_state=self.get_voice_state(ctx.message.guild)
-
-		if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_full'])
-			return None
-
-		if song_name.startswith("http://") == False and song_name.startswith("https://") == False:
-			song_name=song_name.replace(":", "")
 
 		ytdl_opts={
 			'format': 'webm[abr>0]/bestaudio/best',
@@ -415,40 +407,7 @@ class Music(commands.Cog):
 
 		return entry
 
-	@commands.command(no_pm=True)
-	async def playlist(self, ctx, *song_names : str):
-		locale=config.getLocale(ctx.guild.id)
-
-		embed=discord.Embed(title=config.strings[locale]['music']['enqueued_songs'])
-		i=0
-		for name in song_names:
-			tmp=await self.play(ctx, name)
-			if tmp != None:
-				if i < 10:
-					embed.add_field(name=tmp.name, value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader), inline=False)
-
-				i=i+1
-
-		if i > 10:
-			embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(i - 10))
-
-		await ctx.send(embed=embed)
-
-	@commands.command(no_pm=True)
-	async def playsong(self, ctx, *, song_name : str):
-		tmp=await self.play(ctx, song_name)
-		if tmp == None:
-			return
-
-		locale=config.getLocale(ctx.guild.id)
-		embed=discord.Embed(title=config.strings[locale]['music']['enqueued_song'].format(tmp.name), description='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader))
-		if tmp.thumbnail_url != None:
-			embed.set_thumbnail(url=tmp.thumbnail_url)
-
-		await ctx.send(embed=embed)
-
-	@commands.command(no_pm=True, help="music+playytlist_description")
-	async def playytlist(self, ctx, *, playlist_link : str):
+	async def _playytlist(self, ctx, playlist_link):
 		locale=config.getLocale(ctx.guild.id)
 
 		voice_state=self.get_voice_state(ctx.message.guild)
@@ -535,6 +494,47 @@ class Music(commands.Cog):
 					continue
 		else:
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
+
+	@commands.command(no_pm=True)
+	async def play(self, ctx, name):
+		voice_state=self.get_voice_state(ctx.message.guild)
+
+		if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
+			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_full'])
+			return None
+
+		locale=config.getLocale(ctx.guild.id)
+
+		if name.startswith("http://") or name.startswith("https://") or name.startswith("youtu") or name.startswith("www.youtu"):
+			await self._playytlist(ctx, name)
+		else:
+			name=name.replace(":", "")
+			tmp=await self._playsong(ctx, name)
+			
+			embed=discord.Embed(title=config.strings[locale]['music']['enqueued_song'].format(tmp.name), description='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader))
+			if tmp.thumbnail_url != None:
+				embed.set_thumbnail(url=tmp.thumbnail_url)
+
+			await ctx.send(embed=embed)
+
+	@commands.command(no_pm=True)
+	async def playlist(self, ctx, *song_names : str):
+		locale=config.getLocale(ctx.guild.id)
+
+		embed=discord.Embed(title=config.strings[locale]['music']['enqueued_songs'])
+		i=0
+		for name in song_names:
+			tmp=await self._playsong(ctx, name)
+			if tmp != None:
+				if i < 10:
+					embed.add_field(name=tmp.name, value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'], tmp.uploader), inline=False)
+
+				i=i+1
+
+		if i > 10:
+			embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(i - 10))
+
+		await ctx.send(embed=embed)
 
 	@commands.command(no_pm=True, aliases=["quit", "leave"])
 	async def stop(self, ctx):

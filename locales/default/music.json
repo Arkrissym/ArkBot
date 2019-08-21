@@ -6,7 +6,6 @@
   "enqueued_song": "Enqueued {}.",
   "enqueued_songs": "Enqueued list.",
   "repeat_song": "Repeating {}.",
-  "playytlist_description": "Play <playlist_link>.",
   "playytlist_warning": "Searching for a playlist. This might take a long time!",
   "playytlist_enqueue": "Enqueuing playlist {}",
   "playytlist_no_playlist": "That's not a playlist.",
