@@ -34,6 +34,7 @@ import random
 import psycopg2
 from psycopg2 import sql
 import pathlib
+import re
 
 import config
 from logger import logger as log
@@ -240,6 +241,7 @@ class Music(commands.Cog):
 		self.bot=bot
 		self.voice_states={}
 		self.cleanup_task=self.bot.loop.create_task(self.cleanup_task())
+		self.ytplaylist_pattern=re.compile(r"^((http(s?):\/\/)?www\.)?youtu(be)?((\.[a-z]{2,3}){1,2})\/watch\?(([a-zA-Z0-9]+=[a-zA-Z0-9]+)\&)*(list=[^&]*)(\&([a-zA-Z0-9]+=[a-zA-Z0-9]+))*$")
 
 		#fetch config from database
 		for g in bot.guilds:
@@ -505,7 +507,7 @@ class Music(commands.Cog):
 
 		locale=config.getLocale(ctx.guild.id)
 
-		if name.startswith("http://") or name.startswith("https://") or name.startswith("youtu") or name.startswith("www.youtu"):
+		if self.ytplaylist_pattern.match(name):
 			await self._playytlist(ctx, name)
 		else:
 			name=name.replace(":", "")
