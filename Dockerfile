@@ -1,4 +1,4 @@
-FROM debian:stretch AS build
+FROM debian:buster AS build
 
 RUN apt-get update && apt-get install -y \
 	libssl-dev \
@@ -51,7 +51,7 @@ RUN ./configure \
 RUN make -j4
 RUN make install
 
-FROM python:3.6-slim
+FROM python:3.7-slim
 
 WORKDIR /app
 
@@ -64,8 +64,8 @@ RUN apt-get update && apt-get install -y \
 	libmp3lame0 \
 	libtheora0 \
 	libvorbis0a \
-	libvpx4 \
-	libx264-148 \
+	libvpx5 \
+	libx264-155 \
 	libx265-dev \
 	libssl-dev \
 	libxcb1 \
@@ -75,8 +75,8 @@ RUN apt-get update && apt-get install -y \
 	zlib1g \
 	libasound2 \
 	libsdl2-2.0-0 \
-	libva1 \
-	libva-drm1 \
+	libva2 \
+	libva-drm2 \
 	libvdpau1 \
 	libxv1 \
 	libxml2
