@@ -1,6 +1,6 @@
 env:
   global:
-    - IMAGE_NAME=Arkrissym/ArkBot
+    - IMAGE_NAME=arkrissym/arkbot
 
 services:
   - docker
