@@ -1,0 +1,11 @@
+language: python
+
+env:
+  global:
+    - IMAGE_NAME=Arkrissym/ArkBot
+
+services:
+  - docker
+  
+script:
+  - docker build --tag "$IMAGE_NAME" . 
