@@ -1,5 +1,3 @@
-language: python
-
 env:
   global:
     - IMAGE_NAME=Arkrissym/ArkBot
