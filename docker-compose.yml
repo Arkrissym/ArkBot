@@ -13,7 +13,7 @@ services:
 #    ports:
 #     - '5432:5432'
 #    volumes:
-#     - /storage/postgresql-persistance:/bitnami
+#     - /storage/postgresql-persistance:/bitnami/postgresql
     environment:
       POSTGRESQL_PASSWORD: "arkbot"
       POSTGRESQL_USERNAME: "arkbot"
