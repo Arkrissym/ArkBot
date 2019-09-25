@@ -10,6 +10,6 @@ jobs:
     - stage: build docker image
       script:
         - docker build --tag "$IMAGE_TAG" . 
-        - docker images
-        - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_USERNAME" --password-stdin docker.pkg.github.com
-        - docker push "$IMAGE_TAG"
+        #- docker images
+        #- echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_USERNAME" --password-stdin docker.pkg.github.com
+        #- docker push "$IMAGE_TAG"
