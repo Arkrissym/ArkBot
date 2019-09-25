@@ -1,6 +1,6 @@
 env:
   global:
-    - IMAGE_TAG=docker.pkg.github.com/Arkrissym/ArkBot/arkrissym/arkbot:latest
+    - IMAGE_TAG=docker.pkg.github.com/arkrissym/arkbot/arkrissym/arkbot:latest
 
 services:
   - docker
@@ -10,5 +10,6 @@ jobs:
     - stage: build docker image
       script:
         - docker build --tag "$IMAGE_TAG" . 
+        - docker images
         - echo "$GITHUB_TOKEN" | docker login -u "$GITHUB_USERNAME" --password-stdin docker.pkg.github.com
         - docker push "$IMAGE_TAG"
