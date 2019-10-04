@@ -1,6 +1,8 @@
+language: python
+
 env:
   global:
-    - IMAGE_TAG=docker.pkg.github.com/arkrissym/arkbot/arkrissym/arkbot:latest
+    - IMAGE_TAG=docker.pkg.github.com/arkrissym/arkbot/arkbot:latest
 
 services:
   - docker
