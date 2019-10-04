@@ -19,11 +19,18 @@ services:
       POSTGRESQL_USERNAME: "arkbot"
       POSTGRESQL_DATABASE: "arkbot"
   bot:
-    build: .
+    image: docker.pkg.github.com/arkrissym/arkbot/arkbot:latest
     restart: always
     networks:
      - arkbot
+    volumes:
+     - /path/to/your/config.cfg:/app/config.cfg
+     - /path/to/your/token.txt:/app/token.txt
+     - /path/to/your/riotKey.txt:/app/riotKey.txt
+     - /path/to/your/magicShellSoundFolder:/app/sounds/magicShell
     environment:
       DATABASE_URL: "postgres://arkbot:arkbot@db/arkbot"
+      DISCORD_TOKEN: "your-token-here"
+      RIOT_KEY: "your-key-here"
     depends_on:
       db
