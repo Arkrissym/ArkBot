@@ -20,6 +20,7 @@ jobs:
     - name: Build docker image
       run: |
         export IMAGE_TAG=$(date +%s)
+        echo "building image $IMAGE_NAME:$IMAGE_TAG"
         docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
         docker images
         echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
