@@ -1,0 +1,20 @@
+name: Docker Image CI
+
+on: [push]
+
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: docker.pkg.github.com/arkrissym/arkbot/arkbot:$(date +%s)
+      
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Publish the Docker image
+      run: 
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login -u "${{ sectrets.GITHUB_USERNAME }}" --password-stdin docker.pkg.github.com
+        docker push "$IMAGE_TAG"
