@@ -1,6 +1,11 @@
 name: Docker Image CI
 
-on: [push]
+on:
+  push:
+    branches: 
+      - master
+  schedule:
+    - cron: 0 2 * * 5
 
 jobs:
 
@@ -17,7 +22,5 @@ jobs:
         export IMAGE_TAG=$(date +%s)
         docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
         docker images
-    - name: Push the docker image
-      run: |
         echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
         docker push $IMAGE_NAME:$IMAGE_TAG
