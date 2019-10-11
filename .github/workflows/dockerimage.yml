@@ -8,7 +8,8 @@ jobs:
  
     runs-on: ubuntu-latest
     env:
-      IMAGE_TAG: docker.pkg.github.com/arkrissym/arkbot/arkbot:$(date +%s)
+      IMAGE_NAME: docker.pkg.github.com/arkrissym/arkbot/arkbot
+      IMAGE_TAG: $(date +%s)
       
     steps:
     - uses: actions/checkout@v1
