@@ -9,15 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: docker.pkg.github.com/arkrissym/arkbot/arkbot
-      IMAGE_TAG: $(date +%s)
       
     steps:
     - uses: actions/checkout@v1
+    - name: Set image tag
+      run: IMAGE_TAG=$(date +%s)
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag $IMAGE_TAG
+      run: docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
     - name : List Docker images
       run: docker images
     - name: Login to the registry
       run: echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
     - name: Push the Docker image
-      run: docker push $IMAGE_TAG
+      run: docker push $IMAGE_NAME:$IMAGE_TAG
