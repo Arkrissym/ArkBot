@@ -1,5 +1,4 @@
-# ArkBot [![Build Status](https://travis-ci.com/Arkrissym/ArkBot.svg?branch=master)](https://travis-ci.com/Arkrissym/ArkBot)
-![](https://github.com/Arkrissym/ArkBot/workflows/Docker%20Image%20CI/badge.svg)
+# ArkBot ![](https://github.com/Arkrissym/ArkBot/workflows/Docker%20Image%20CI/badge.svg)
 a Discord-Bot
 
 ### Docker image
