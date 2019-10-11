@@ -13,6 +13,10 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-    - name: Publish the Docker image
-      run: echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com && docker push "$IMAGE_TAG"
+      run: docker build . --file Dockerfile --tag $IMAGE_TAG
+    - name : List Docker images
+      run: docker images
+    - name: Login to the registry
+      run: echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
+    - name: Push the Docker image
+      run: docker push $IMAGE_TAG
