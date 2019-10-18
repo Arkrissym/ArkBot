@@ -19,8 +19,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: Save build date
       run: |
-        - date > build_date.txt
-        - cat build_date.txt
+        date > build_date.txt
+        cat build_date.txt
     - name: Build docker image
       run: |
         export IMAGE_TAG=$(date +%s)
