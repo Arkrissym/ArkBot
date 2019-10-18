@@ -115,6 +115,13 @@ bot=commands.AutoShardedBot(command_prefix=get_prefix, help_command=MyHelpComman
 
 @bot.event
 async def on_ready():
+	try:
+		with open("build_date.txt") as build_date:
+			logger.info("Docker image built at: {}".format(build_date.readline()))
+			build_date.close()
+	except:
+		pass
+
 	logger.info('Logged in as ' + bot.user.name)
 	logger.info('discord.py version: ' + discord.__version__)
 	await bot.change_presence(status=discord.Status.online, activity=discord.Game(name='github.com/Arkrissym/ArkBot'), afk=False)
