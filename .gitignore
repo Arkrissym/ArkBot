@@ -10,5 +10,7 @@ ArkBot_Github.pyproj
 /sounds/magicShell/default/*.mp3
 ffmpeg*
 /sounds/customCommands/*
-/sounds/customCommands/*
+
 /sounds/music
+
+.idea/
