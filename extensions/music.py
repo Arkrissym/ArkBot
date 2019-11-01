@@ -149,8 +149,12 @@ class VoiceState:
 	def resume(self):
 		self.voice_client.resume()
 
+	def is_playing(self):
+		return self.voice_client.is_playing()
+
 	def play_next(self, error):
 		self.previous_song = self.current_song
+		self.current_song = None
 		self.bot.loop.call_soon_threadsafe(self.play_next_song.set)
 
 	async def audio_player_task(self):
@@ -164,7 +168,7 @@ class VoiceState:
 						wait = False
 				await asyncio.sleep(1.0)
 
-			if getLoopMode(self.voice_channel.guild.id) == "on" and self.previous_song != None:
+			if getLoopMode(self.voice_channel.guild.id) == "on" and self.previous_song is not None:
 				self.songs.append(self.previous_song)
 
 			while len(self.songs) == 0:
@@ -175,7 +179,7 @@ class VoiceState:
 			proc = None
 			download = False
 
-			if self.current_song.id == None:
+			if self.current_song.id is None:
 				log.info("music - streaming audio")
 				self.voice_client.play(discord.PCMVolumeTransformer(
 					discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3),
@@ -234,7 +238,7 @@ class VoiceState:
 					proc.communicate()
 					log.info('ffmpeg process %s should have terminated with a return code of %s.', proc.pid,
 							 proc.returncode)
-					if download == True:
+					if download:
 						os.remove(filename)
 				else:
 					log.info('ffmpeg process %s successfully terminated with return code of %s.', proc.pid,
@@ -324,8 +328,8 @@ class Music(commands.Cog):
 
 	@commands.command(no_pm=True, aliases=["summon"])
 	async def join(self, ctx, *, channel: discord.VoiceChannel = None):
-		if channel == None:
-			if ctx.message.author.voice == None:
+		if channel is None:
+			if ctx.message.author.voice is None:
 				return
 			else:
 				channel = ctx.message.author.voice.channel
@@ -334,6 +338,8 @@ class Music(commands.Cog):
 		try:
 			state.voice_client = await channel.connect()
 			state.voice_channel = channel
+		except discord.InvalidArgument:
+			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_no_channel'])
 		except discord.ClientException:
 			move = False
 			for ch in ctx.guild.voice_channels:
@@ -352,8 +358,6 @@ class Music(commands.Cog):
 					await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_channel'])
 			else:
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_channel'])
-		except discord.InvalidArgument:
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_no_channel'])
 		else:
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_success'].format(channel.name))
 
@@ -365,8 +369,9 @@ class Music(commands.Cog):
 			'prefer_ffmpeg': True,
 			'default_search': 'ytsearch',
 			'noplaylist': True,
-			'quiet': True,
+			# 'quiet': True,
 			'ignoreerrors': True,
+			'mark-watched': True,
 			'logger': log
 		}
 
@@ -401,12 +406,13 @@ class Music(commands.Cog):
 			else:
 				uploader = 'Unknown'
 
-			if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
-				id = info['id']
+			if 'id' in info and not ("is_live" in info and info["is_live"] is True) and info["duration"] < 600:
+				video_id = info['id']
 			else:
-				id = None
+				video_id = None
 
-			entry = VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader, id)
+			entry = VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url, uploader,
+							   video_id)
 
 			if getQueueMode(ctx.guild.id) == 'random' and len(voice_state.songs) > 1:
 				voice_state.songs.insert(random.randint(0, len(voice_state.songs) - 1), entry)
@@ -440,6 +446,7 @@ class Music(commands.Cog):
 			'quiet': True,
 			'playlistrandom': _random,
 			'ignoreerrors': True,
+			'mark-watched': True,
 			'logger': log
 		}
 
@@ -485,17 +492,17 @@ class Music(commands.Cog):
 					else:
 						uploader = None
 
-					if 'id' in info and not ("is_live" in info and info["is_live"] == True) and info["duration"] < 600:
-						id = info['id']
+					if 'id' in info and not ("is_live" in info and info["is_live"] is True) and info["duration"] < 600:
+						video_id = info['id']
 					else:
-						id = None
+						video_id = None
 
 					if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
 						await ctx.send(config.strings[locale]['music']['queue_full'])
 						return
 
 					song_entry = VoiceEntry(ctx.message.author, ctx.message.channel, song_name, url, thumbnail_url,
-											uploader, id)
+											uploader, video_id)
 
 					if queue_mode == 'random' and len(voice_state.songs) > 1:
 						voice_state.songs.insert(random.randint(0, len(voice_state.songs) - 1), song_entry)
@@ -527,7 +534,7 @@ class Music(commands.Cog):
 			embed = discord.Embed(title=config.strings[locale]['music']['enqueued_song'].format(tmp.name),
 								  description='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
 															 tmp.uploader))
-			if tmp.thumbnail_url != None:
+			if tmp.thumbnail_url is not None:
 				embed.set_thumbnail(url=tmp.thumbnail_url)
 
 			await ctx.send(embed=embed)
@@ -540,7 +547,7 @@ class Music(commands.Cog):
 		i = 0
 		for name in song_names:
 			tmp = await self._playsong(ctx, name)
-			if tmp != None:
+			if tmp is not None:
 				if i < 10:
 					embed.add_field(name=tmp.name,
 									value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
@@ -556,26 +563,27 @@ class Music(commands.Cog):
 	@commands.command(no_pm=True, aliases=["quit", "leave"])
 	async def stop(self, ctx):
 		state = self.get_voice_state(ctx.message.guild)
-		if state.voice_client and ((ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel) or (
+		if state.voice_client and (
+				(ctx.author.voice is not None and state.voice_channel == ctx.author.voice.channel) or (
 				len(discord.utils.get(ctx.guild.voice_channels, id=state.voice_channel.id).members) == 1)):
 			await state.stop()
 
 	@commands.command(no_pm=True)
 	async def skip(self, ctx):
 		state = self.get_voice_state(ctx.message.guild)
-		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
+		if state.voice_client and ctx.author.voice is not None and state.voice_channel == ctx.author.voice.channel:
 			state.skip()
 
 	@commands.command(no_pm=True)
 	async def pause(self, ctx):
 		state = self.get_voice_state(ctx.message.guild)
-		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
+		if state.voice_client and ctx.author.voice is not None and state.voice_channel == ctx.author.voice.channel:
 			state.pause()
 
 	@commands.command(no_pm=True, aliases=["continue", "unpause"])
 	async def resume(self, ctx):
 		state = self.get_voice_state(ctx.message.guild)
-		if state.voice_client and ctx.author.voice != None and state.voice_channel == ctx.author.voice.channel:
+		if state.voice_client and ctx.author.voice is not None and state.voice_channel == ctx.author.voice.channel:
 			state.resume()
 
 	@commands.command(no_pm=True, aliases=['np', 'current'])
@@ -583,7 +591,7 @@ class Music(commands.Cog):
 		voice_state = self.get_voice_state(ctx.message.guild)
 		locale = config.getLocale(ctx.guild.id)
 
-		if voice_state.current_song == None:
+		if voice_state.current_song is None:
 			embed = discord.Embed(title=config.strings[locale]['music']['nowplaying_nothing'])
 			await ctx.send(embed=embed)
 		else:
@@ -592,7 +600,7 @@ class Music(commands.Cog):
 							value=voice_state.current_song.name)
 			embed.add_field(name=config.strings[locale]['music']['nowplaying_uploader'],
 							value=voice_state.current_song.uploader)
-			if voice_state.current_song.thumbnail_url != None:
+			if voice_state.current_song.thumbnail_url is not None:
 				embed.set_thumbnail(url=voice_state.current_song.thumbnail_url)
 			await ctx.send(embed=embed)
 
@@ -607,7 +615,7 @@ class Music(commands.Cog):
 		elif mode == 'off':
 			setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), mode)
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_off'])
-		elif mode == None:
+		elif mode is None:
 			if getLoopMode(ctx.guild.id) == "on":
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['loop_on'])
 			else:
@@ -624,7 +632,7 @@ class Music(commands.Cog):
 		elif mode == 'random':
 			setConfig(ctx.guild.id, mode, getLoopMode(ctx.guild.id))
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_random'])
-		elif mode == None:
+		elif mode is None:
 			if getQueueMode(ctx.guild.id) == 'normal':
 				await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['queue_mode_normal'])
 			else:
@@ -634,7 +642,7 @@ class Music(commands.Cog):
 	async def repeat(self, ctx):
 		voice_state = self.get_voice_state(ctx.message.guild)
 
-		if ctx.author.voice == None or voice_state.voice_channel != ctx.author.voice.channel:
+		if ctx.author.voice is None or voice_state.voice_channel != ctx.author.voice.channel:
 			return
 
 		previous = voice_state.previous_song
@@ -651,10 +659,8 @@ class Music(commands.Cog):
 				voice_state.songs.appendleft(current)
 			voice_state.songs.appendleft(previous)
 
-			voice_state.skip()
-
-			while current == voice_state.current_song:
-				await asyncio.sleep(0.1)
+			if voice_state.is_playing():
+				voice_state.skip()
 
 			if loop == "on":
 				setConfig(ctx.guild.id, getQueueMode(ctx.guild.id), "on")
@@ -664,37 +670,38 @@ class Music(commands.Cog):
 			embed = discord.Embed(title=config.strings[locale]['music']['repeat_song'].format(previous.name),
 								  description='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
 															 previous.uploader))
-			if previous.thumbnail_url != None:
+			if previous.thumbnail_url is not None:
 				embed.set_thumbnail(url=previous.thumbnail_url)
 
 			await ctx.send(embed=embed)
 
-	@commands.command(no_pm=True)
-	async def queue(self, ctx):
-		voice_state = self.get_voice_state(ctx.message.guild)
-		songs = asyncio.Queue()
 
-		for t in voice_state.songs:
-			await songs.put(t)
+@commands.command(no_pm=True)
+async def queue(self, ctx):
+	voice_state = self.get_voice_state(ctx.message.guild)
+	songs = asyncio.Queue()
 
-		locale = config.getLocale(ctx.guild.id)
+	for t in voice_state.songs:
+		await songs.put(t)
 
-		if songs.empty():
-			embed = discord.Embed(title=config.strings[locale]['music']['queue_title'],
-								  description=config.strings[locale]['music']['queue_empty'])
-		else:
-			embed = discord.Embed(title=config.strings[locale]['music']['queue_title'])
-			for i in range(1, 11):
-				song = await songs.get()
-				embed.add_field(name='{}: {}'.format(i, song.name),
-								value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
-													 song.uploader), inline=False)
-				if songs.empty():
-					break
-			if songs.qsize() > 0:
-				embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(songs.qsize()))
+	locale = config.getLocale(ctx.guild.id)
 
-		await ctx.send(embed=embed)
+	if songs.empty():
+		embed = discord.Embed(title=config.strings[locale]['music']['queue_title'],
+							  description=config.strings[locale]['music']['queue_empty'])
+	else:
+		embed = discord.Embed(title=config.strings[locale]['music']['queue_title'])
+		for i in range(1, 11):
+			song = await songs.get()
+			embed.add_field(name='{}: {}'.format(i, song.name),
+							value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
+												 song.uploader), inline=False)
+			if songs.empty():
+				break
+		if songs.qsize() > 0:
+			embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(songs.qsize()))
+
+	await ctx.send(embed=embed)
 
 
 def setup(bot):
