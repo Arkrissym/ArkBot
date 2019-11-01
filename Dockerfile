@@ -48,7 +48,7 @@ RUN ./configure \
 	--enable-nonfree \
 	--enable-openssl \
 	--enable-libxml2
-RUN make -j4
+RUN make -j16
 RUN make install
 
 FROM python:3.7-slim

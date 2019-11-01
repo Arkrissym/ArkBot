@@ -1,39 +1,22 @@
-#MIT License
+# MIT License
+# see LICENSE for details
 
-#Copyright (c) 2018-2019 Arkrissym
+# Copyright (c) 2018-2019 Arkrissym
 
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
 
-#The above copyright notice and this permission notice shall be included in all
-#copies or substantial portions of the Software.
-
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#SOFTWARE.
+import asyncio
+import os
+import pathlib
+import subprocess
 
 import discord
-from discord.ext import commands
-
-from logger import logger as log
-import config
-
-import os
 import psycopg2
-from psycopg2 import sql
 import youtube_dl
-import asyncio
-import subprocess
-import pathlib
-import time
+from discord.ext import commands
+from psycopg2 import sql
+
+from core import config
+from core.logger import logger as log
 
 if not discord.opus.is_loaded():
 	try:
@@ -44,11 +27,12 @@ if not discord.opus.is_loaded():
 		except:
 			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
 
+
 class CustomCommands(commands.Cog):
 	def __init__(self, bot):
-		self.bot=bot
-		self.commands={}
-		self.voice_clients=set()
+		self.bot = bot
+		self.commands = {}
+		self.voice_clients = set()
 
 	@commands.Cog.listener()
 	async def on_connect(self):
@@ -61,51 +45,64 @@ class CustomCommands(commands.Cog):
 	@commands.Cog.listener()
 	async def on_ready(self):
 		if config.config["CustomCommands"]["download_audio"].lower() == "true":
-			pathlib.Path("{}/../sounds/customCommands".format(os.path.dirname(__file__))).mkdir(parents=True, exist_ok=True)
+			pathlib.Path("{}/../sounds/customCommands".format(os.path.dirname(__file__))).mkdir(parents=True,
+																								exist_ok=True)
 
 			for g in self.bot.guilds:
-#				log.info("checking guild: " + str(g))
-				all_commands={}
-				tries=0
+				#				log.info("checking guild: " + str(g))
+				all_commands = {}
+				tries = 0
 				while all_commands == {} and tries < 30:
-					all_commands=self.getCommands(g.id)
+					all_commands = self.getCommands(g.id)
 					if all_commands == {}:
-						tries=tries+1
+						tries = tries + 1
 						await asyncio.sleep(10)
-					
+
 				for command in all_commands.keys():
 					try:
-						if all_commands[command]["type"] == "music" and not str(g.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
-							link_or_name=all_commands[command]["result"]
+						if all_commands[command]["type"] == "music" and not str(g.id) in os.listdir(
+								'{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(
+							command) in os.listdir(
+							'{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
+							link_or_name = all_commands[command]["result"]
 
-							ytdl_opts={
+							ytdl_opts = {
 								'format': 'webm[abr>0]/bestaudio/best',
 								'prefer_ffmpeg': True,
 								'default_search': 'ytsearch',
 								'noplaylist': True,
 								'quiet': True,
-								'ignoreerrors' : True,
+								'ignoreerrors': True,
 								'logger': log
 							}
 
-							ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-							info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
+							ytdl = youtube_dl.YoutubeDL(ytdl_opts)
+							info = await self.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
 
 							if "entries" in info:
-								info=info['entries'][0]
+								info = info['entries'][0]
 
-							source=info['url']
+							source = info['url']
 
-							filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(g.id), command)
+							filename = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__),
+																					  str(g.id), command)
 
 							pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
 							log.info("Downloading audio for command: " + command)
-							await self.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
-						elif all_commands[command]["type"] == "user_audio" and not str(g.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
-							filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command)
+							await self.bot.loop.run_in_executor(None, subprocess.call,
+																["ffmpeg", "-y", "-i", source, filename, "-loglevel",
+																 "warning"])
+						elif all_commands[command]["type"] == "user_audio" and not str(g.id) in os.listdir(
+								'{}/../sounds/customCommands'.format(os.path.dirname(__file__))) or not "{}.mp3".format(
+							command) in os.listdir(
+							'{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(g.id))):
+							filename = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__),
+																					  str(g.id), command)
 
-							await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , all_commands[command]["result"], filename, "-loglevel", "warning"])
+							await self.bot.loop.run_in_executor(None, subprocess.call,
+																["ffmpeg", "-y", "-i", all_commands[command]["result"],
+																 filename, "-loglevel", "warning"])
 					except Exception as e:
 						log.warning(str(e))
 
@@ -114,19 +111,19 @@ class CustomCommands(commands.Cog):
 			return self.commands[str(guild_id)]
 
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
-			cur=conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
+			conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
+			cur = conn.cursor("dataBase_cursor", cursor_factory=psycopg2.extras.DictCursor)
 			cur.execute(sql.SQL("SELECT * FROM customCommands WHERE id = %s"), [str(guild_id)])
 
 			ret = {}
 			for row in cur:
 				if row[0] == str(guild_id):
-					ret[row[1]]={
-						"type" : row[2],
-						"result" : row[3]
-						}
+					ret[row[1]] = {
+						"type": row[2],
+						"result": row[3]
+					}
 
-			self.commands[str(guild_id)]=ret
+			self.commands[str(guild_id)] = ret
 
 			cur.close()
 			conn.close()
@@ -138,10 +135,11 @@ class CustomCommands(commands.Cog):
 
 	def addCommand(self, guild_id, command, type, result):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
-			cur=conn.cursor()
+			conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
+			cur = conn.cursor()
 
-			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"), [str(guild_id), str(command), str(type), str(result)])
+			cur.execute(sql.SQL("INSERT INTO customCommands VALUES (%s, %s, %s, %s)"),
+						[str(guild_id), str(command), str(type), str(result)])
 
 			conn.commit()
 
@@ -151,24 +149,25 @@ class CustomCommands(commands.Cog):
 			log.warning("customCommands - cannot write to database: %s", str(e))
 
 		if str(guild_id) in self.commands.keys():
-			self.commands[str(guild_id)][str(command)]={
-				"type" : str(type),
-				"result" : str(result)
-				}
+			self.commands[str(guild_id)][str(command)] = {
+				"type": str(type),
+				"result": str(result)
+			}
 		else:
-			self.commands[str(guild_id)]={
-				str(command) : {
-					"type" : str(type),
-					"result" : str(result)
-					}
+			self.commands[str(guild_id)] = {
+				str(command): {
+					"type": str(type),
+					"result": str(result)
 				}
+			}
 
 	def deleteCommand(self, guild_id, command):
 		try:
-			conn=psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
-			cur=conn.cursor()
+			conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode="prefer")
+			cur = conn.cursor()
 
-			cur.execute(sql.SQL("DELETE FROM customCommands WHERE id = %s AND command = %s"), [str(guild_id), str(command)])
+			cur.execute(sql.SQL("DELETE FROM customCommands WHERE id = %s AND command = %s"),
+						[str(guild_id), str(command)])
 
 			conn.commit()
 
@@ -181,11 +180,12 @@ class CustomCommands(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
-		if message.author.bot or message.guild == None or message.content.startswith(config.getPrefix(message.guild.id)) == False:
+		if message.author.bot or message.guild == None or message.content.startswith(
+				config.getPrefix(message.guild.id)) == False:
 			return
 
-		prefix_len=len(config.getPrefix(message.guild.id))
-		all_commands=self.getCommands(message.guild.id)
+		prefix_len = len(config.getPrefix(message.guild.id))
+		all_commands = self.getCommands(message.guild.id)
 
 		for command in all_commands.keys():
 			if command == message.content[prefix_len:]:
@@ -193,34 +193,43 @@ class CustomCommands(commands.Cog):
 					if message.author.voice.channel == None:
 						continue
 
-					if str(message.guild.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
-						source='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(message.guild.id), command)
+					if str(message.guild.id) in os.listdir(
+							'{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(
+						command) in os.listdir(
+						'{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
+						source = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__),
+																				str(message.guild.id), command)
 					else:
-						ytdl_opts={
+						ytdl_opts = {
 							'format': 'webm[abr>0]/bestaudio/best',
 							'prefer_ffmpeg': True,
 							'default_search': 'ytsearch',
 							'noplaylist': True,
 							'quiet': True,
-							'ignoreerrors' : True,
+							'ignoreerrors': True,
 							'logger': log
 						}
 
-						ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-						info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, all_commands[command]["result"], False)
+						ytdl = youtube_dl.YoutubeDL(ytdl_opts)
+						info = await self.bot.loop.run_in_executor(None, ytdl.extract_info,
+																   all_commands[command]["result"], False)
 						if "entries" in info:
-							info=info['entries'][0]
+							info = info['entries'][0]
 
-						source=info['url']
-						
-					voice_client=None
+						source = info['url']
+
+					voice_client = None
 					try:
-						voice_client=await message.author.voice.channel.connect()
+						voice_client = await message.author.voice.channel.connect()
 						self.voice_clients.add(voice_client)
 					except discord.ClientException:
-						await message.channel.send(config.strings[config.getLocale(message.channel.guild.id)]['customCommands']['join_channel'])
+						await message.channel.send(
+							config.strings[config.getLocale(message.channel.guild.id)]['customCommands'][
+								'join_channel'])
 					else:
-						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'), volume=0.8))
+						voice_client.play(
+							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'),
+														 volume=0.8))
 						while voice_client.is_playing():
 							await asyncio.sleep(0.2)
 						await asyncio.sleep(1)
@@ -229,70 +238,86 @@ class CustomCommands(commands.Cog):
 						await voice_client.disconnect()
 						self.voice_clients.remove(voice_client)
 				elif all_commands[command]["type"] == "user_audio":
-					if str(message.guild.id) in os.listdir('{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(command) in os.listdir('{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
-						source='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(message.guild.id), command)
+					if str(message.guild.id) in os.listdir(
+							'{}/../sounds/customCommands'.format(os.path.dirname(__file__))) and "{}.mp3".format(
+						command) in os.listdir(
+						'{}/../sounds/customCommands/{}'.format(os.path.dirname(__file__), str(message.guild.id))):
+						source = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__),
+																				str(message.guild.id), command)
 					else:
-						source=all_commands[command]["result"]
-						
-					voice_client=None
+						source = all_commands[command]["result"]
+
+					voice_client = None
 					try:
-						voice_client=await message.author.voice.channel.connect()
+						voice_client = await message.author.voice.channel.connect()
 					except discord.ClientException:
-						await message.channel.send(config.strings[config.getLocale(message.channel.guild.id)]['customCommands']['join_channel'])
+						await message.channel.send(
+							config.strings[config.getLocale(message.channel.guild.id)]['customCommands'][
+								'join_channel'])
 					else:
-						voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'), volume=0.8))
+						voice_client.play(
+							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'),
+														 volume=0.8))
 						while voice_client.is_playing():
 							await asyncio.sleep(0.1)
 						await asyncio.sleep(1)
 
 					if voice_client:
 						await voice_client.disconnect()
-				else: #text
+				else:  # text
 					await message.channel.send(all_commands[command]["result"])
 
 	@commands.command(no_pm=True, help="customCommands+list_commands_help")
 	async def list_commands(self, ctx):
-		text=""
+		text = ""
 		for command_name in self.getCommands(ctx.guild.id).keys():
-			text=text + "\n" + command_name
+			text = text + "\n" + command_name
 
 		if text == "":
-			text=config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["no_commands"]
+			text = config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["no_commands"]
 
-		#embed=discord.Embed(title=config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["list_commands"], description=text)
-		embed=discord.Embed(description=text)
+		# embed=discord.Embed(title=config.strings[config.getLocale(ctx.guild.id)]["customCommands"]["list_commands"], description=text)
+		embed = discord.Embed(description=text)
 		await ctx.send(embed=embed)
 
-	@commands.command(no_pm=True, brief="customCommands+delete_command_brief", help="customCommands+delete_command_help")
+	@commands.command(no_pm=True, brief="customCommands+delete_command_brief",
+					  help="customCommands+delete_command_help")
 	@config.is_admin_or_owner()
-	async def delete_command(self, ctx, command : str):
+	async def delete_command(self, ctx, command: str):
 		if not command in self.getCommands(ctx.guild.id).keys():
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_doesnt_exist'].format(command))
+			await ctx.send(
+				config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_doesnt_exist'].format(
+					command))
 			return
 
 		await ctx.bot.loop.run_in_executor(None, self.deleteCommand, ctx.guild.id, command)
 
 		try:
-			os.remove('{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command))
+			os.remove(
+				'{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command))
 		except:
 			pass
 
-		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['delete_command'].format(command))
+		await ctx.send(
+			config.strings[config.getLocale(ctx.guild.id)]['customCommands']['delete_command'].format(command))
 
-	@commands.command(no_pm=True, brief="customCommands+add_text_command_brief", help="customCommands+add_text_command_help")
+	@commands.command(no_pm=True, brief="customCommands+add_text_command_brief",
+					  help="customCommands+add_text_command_help")
 	@config.is_admin_or_owner()
-	async def add_text_command(self, ctx, command : str, *, answer : str):
+	async def add_text_command(self, ctx, command: str, *, answer: str):
 		if command in self.getCommands(ctx.guild.id).keys():
-			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_exists'].format(command))
+			await ctx.send(
+				config.strings[config.getLocale(ctx.guild.id)]['customCommands']['command_exists'].format(command))
 			return
 
 		await ctx.bot.loop.run_in_executor(None, self.addCommand, ctx.guild.id, command, "text", answer)
 		await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['customCommands']['add_command'].format(command))
 
-	@commands.command(no_pm=True, brief="customCommands+add_music_command_brief", help="customCommands+add_music_command_help")
+	@commands.command(no_pm=True, brief="customCommands+add_music_command_brief",
+					  help="customCommands+add_music_command_help")
 	@config.is_admin_or_owner()
-	async def add_music_command(self, ctx, command : str, *, link_or_name : str = None):
-		locale=config.getLocale(ctx.guild.id)
+	async def add_music_command(self, ctx, command: str, *, link_or_name: str = None):
+		locale = config.getLocale(ctx.guild.id)
 
 		if command in self.getCommands(ctx.guild.id).keys():
 			await ctx.send(config.strings[locale]['customCommands']['command_exists'].format(command))
@@ -303,51 +328,56 @@ class CustomCommands(commands.Cog):
 				await ctx.send(config.strings[locale]["customCommands"]["no_audio_file_or_link"])
 				return
 
-			audio_url=ctx.message.attachments[0].url
+			audio_url = ctx.message.attachments[0].url
 
-			#log.info(audio_url)
+			# log.info(audio_url)
 
 			if config.config["CustomCommands"]["download_audio"].lower() == "true":
-				filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command)
+				filename = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id),
+																		  command)
 
 				log.info("Downloading audio for command: " + command)
-				await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , audio_url, filename, "-loglevel", "warning"])
-				
+				await ctx.bot.loop.run_in_executor(None, subprocess.call,
+												   ["ffmpeg", "-y", "-i", audio_url, filename, "-loglevel", "warning"])
+
 			await ctx.bot.loop.run_in_executor(None, self.addCommand, ctx.guild.id, command, "user_audio", audio_url)
 		else:
 			if config.config["CustomCommands"]["download_audio"].lower() == "true":
-				ytdl_opts={
+				ytdl_opts = {
 					'format': 'webm[abr>0]/bestaudio/best',
 					'prefer_ffmpeg': True,
 					'default_search': 'ytsearch',
 					'noplaylist': True,
 					'quiet': True,
-					'ignoreerrors' : True,
+					'ignoreerrors': True,
 					'logger': log
 				}
 
-				ytdl=youtube_dl.YoutubeDL(ytdl_opts)
-				info=await self.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
+				ytdl = youtube_dl.YoutubeDL(ytdl_opts)
+				info = await self.bot.loop.run_in_executor(None, ytdl.extract_info, link_or_name, False)
 
 				if "entries" in info:
-					info=info['entries'][0]
+					info = info['entries'][0]
 
 				if "is_live" in info and info["is_live"] == True:
 					await ctx.send(config.strings[locale]["customCommands"]["warn_live"])
 					return
 
-				source=info['url']
+				source = info['url']
 
-				filename='{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id), command)
+				filename = '{}/../sounds/customCommands/{}/{}.mp3'.format(os.path.dirname(__file__), str(ctx.guild.id),
+																		  command)
 
 				log.info("Downloading audio for command: " + command)
 				pathlib.Path(os.path.dirname(filename)).mkdir(parents=True, exist_ok=True)
 
-				await ctx.bot.loop.run_in_executor(None, subprocess.call, ["ffmpeg", "-y", "-i" , source, filename, "-loglevel", "warning"])
-				
+				await ctx.bot.loop.run_in_executor(None, subprocess.call,
+												   ["ffmpeg", "-y", "-i", source, filename, "-loglevel", "warning"])
+
 			await ctx.bot.loop.run_in_executor(None, self.addCommand, ctx.guild.id, command, "music", link_or_name)
-		
+
 		await ctx.send(config.strings[locale]['customCommands']['add_command'].format(command))
+
 
 def setup(bot):
 	bot.add_cog(CustomCommands(bot))
