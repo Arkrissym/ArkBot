@@ -29,8 +29,10 @@ import psycopg2
 import psycopg2.extras
 from discord.ext import commands
 from psycopg2 import sql
+import logging
 
 from core.logger import logger as log
+from core.logger import ch
 
 config = {}
 strings = {}
@@ -76,10 +78,11 @@ def load_locales():
 		log.error('failed to load strings: {}'.format(str(e)))
 
 
-if _initialized == False:
+if not _initialized:
 	try:
 		config = ConfigParser(interpolation=ExtendedInterpolation())
 		config.read('config.cfg')
+		ch.setLevel(logging.getLevelName(config["logging"]["level"]))
 	except Exception as e:
 		log.error('failed to load config: ' + str(e))
 
@@ -144,7 +147,7 @@ def getPrefix(guild_id):
 	except:
 		return config['bot']['cmd_prefix']
 
-	if data == None:
+	if data is None:
 		return config['bot']['cmd_prefix']
 
 	return data[1]
@@ -156,7 +159,7 @@ def getLocale(guild_id):
 	except:
 		return config['bot']['locale']
 
-	if data == None:
+	if data is None:
 		return config['bot']['locale']
 
 	return data[2]
