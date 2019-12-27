@@ -25,11 +25,9 @@ from core.logger import logger as log
 if not discord.opus.is_loaded():
 	try:
 		discord.opus.load_opus('opus')
-	except:
-		try:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
-		except:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
+	except Exception as e:
+		log.error("music - Failed to load opus lib")
+		raise e
 
 _config = {}
 
@@ -252,6 +250,8 @@ class Music(commands.Cog):
 		self.cleanup_task = self.bot.loop.create_task(self.cleanup_task())
 		self.ytplaylist_pattern = re.compile(
 			r"^((http(s?):\/\/)?www\.)?youtu(be)?((\.[a-z]{2,3}){1,2})\/watch\?(([a-zA-Z0-9]+=[a-zA-Z0-9]+)\&)*(list=[^&]*)(\&([a-zA-Z0-9]+=[a-zA-Z0-9]+))*$")
+		self.link_pattern = re.compile(
+			r"(https?:\/\/)?(www\.)?(([-a-zA-Z0-9@:%_\+~#=]+\.)+)([a-z]{2,})(:[1-9]+[0-9]*)?(\/[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)?")
 
 		# fetch config from database
 		for g in bot.guilds:
@@ -362,6 +362,8 @@ class Music(commands.Cog):
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_success'].format(channel.name))
 
 	async def _playsong(self, ctx, song_name):
+		log.debug("music - song name: {}".format(song_name))
+
 		voice_state = self.get_voice_state(ctx.message.guild)
 
 		ytdl_opts = {
@@ -526,9 +528,12 @@ class Music(commands.Cog):
 		locale = config.getLocale(ctx.guild.id)
 
 		if self.ytplaylist_pattern.match(name):
+			log.debug("music - playing a playlist")
 			await self._playytlist(ctx, name)
 		else:
-			name = name.replace(":", "")
+			log.debug("music - playing a single video/song")
+			if not self.link_pattern.match(name):
+				name = name.replace(":", "")
 			tmp = await self._playsong(ctx, name)
 
 			embed = discord.Embed(title=config.strings[locale]['music']['enqueued_song'].format(tmp.name),
