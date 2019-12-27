@@ -362,8 +362,6 @@ class Music(commands.Cog):
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_success'].format(channel.name))
 
 	async def _playsong(self, ctx, song_name):
-		log.debug("music - song name: {}".format(song_name))
-
 		voice_state = self.get_voice_state(ctx.message.guild)
 
 		ytdl_opts = {
@@ -518,7 +516,10 @@ class Music(commands.Cog):
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
 
 	@commands.command(no_pm=True)
-	async def play(self, ctx, name):
+	async def play(self, ctx, *, name: str = None):
+		if name is None:
+			return None
+
 		voice_state = self.get_voice_state(ctx.message.guild)
 
 		if voice_state.songs.maxlen and len(voice_state.songs) == voice_state.songs.maxlen:
