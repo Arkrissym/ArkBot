@@ -180,7 +180,7 @@ class VoiceState:
 				log.info("music - streaming audio because no id was provided")
 				self.voice_client.play(discord.PCMVolumeTransformer(
 					discord.FFmpegPCMAudio(self.current_song.url,
-										   before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max",
+										   before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
 										   options='-loglevel warning'), volume=0.5),
 					after=self.play_next)
 			elif not "music" in os.listdir('{}/../sounds'.format(os.path.dirname(__file__))) or not any(
