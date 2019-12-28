@@ -6,12 +6,14 @@
 
 import logging
 
-logger = logging.getLogger('discord')
-logger.setLevel(logging.DEBUG)
+parent_logger = logging.getLogger('discord')
+parent_logger.setLevel(logging.DEBUG)
+
+logger = parent_logger.getChild("application")
 
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 
 ch.setFormatter(logging.Formatter('%(levelname)s - %(name)s - %(message)s'))
 
-logger.addHandler(ch)
+parent_logger.addHandler(ch)
