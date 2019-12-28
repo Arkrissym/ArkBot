@@ -362,6 +362,9 @@ class Music(commands.Cog):
 			await ctx.send(config.strings[config.getLocale(ctx.guild.id)]['music']['join_success'].format(channel.name))
 
 	async def _playsong(self, ctx, song_name):
+		if not self.link_pattern.match(song_name):
+			song_name = song_name.replace(":", "")
+
 		voice_state = self.get_voice_state(ctx.message.guild)
 
 		ytdl_opts = {
@@ -520,8 +523,6 @@ class Music(commands.Cog):
 			await self._playytlist(ctx, name)
 		else:
 			log.debug("music - playing a single video/song")
-			if not self.link_pattern.match(name):
-				name = name.replace(":", "")
 			tmp = await self._playsong(ctx, name)
 
 			embed = discord.Embed(title=config.strings[locale]['music']['enqueued_song'].format(tmp.name),
