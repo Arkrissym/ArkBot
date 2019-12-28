@@ -393,7 +393,7 @@ class Music(commands.Cog):
 		try:
 			url = info['url']
 
-			is_twitch = 'twitch' in url
+			is_twitch = 'extractor' in info and info['extractor'] == 'twitch:stream'
 			if is_twitch:
 				song_name = info.get('description', None)
 			else:
@@ -401,7 +401,7 @@ class Music(commands.Cog):
 
 			thumbnail_url = info.get('thumbnail', None)
 			uploader = info.get('uploader', None)
-			is_live = info.get('is_live', None)
+			is_live = info.get('is_live', False)
 			duration = info.get('duration', 0)
 
 			if is_live is not True and duration < 600:
@@ -471,7 +471,7 @@ class Music(commands.Cog):
 				try:
 					url = entry['url']
 
-					is_twitch = 'twitch' in url
+					is_twitch = 'extractor' in info and info['extractor'] == 'twitch:stream'
 					if is_twitch:
 						song_name = entry.get('description', None)
 					else:
@@ -479,7 +479,7 @@ class Music(commands.Cog):
 
 					thumbnail_url = entry.get('thumbnail', None)
 					uploader = entry.get('uploader', None)
-					is_live = entry.get('is_live', None)
+					is_live = entry.get('is_live', False)
 					duration = entry.get('duration', 0)
 
 					if is_live is not True and duration < 600:
