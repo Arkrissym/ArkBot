@@ -161,9 +161,8 @@ class VoiceState:
 
 			wait = True
 			while wait:
-				if self.voice_client is not None:
-					if self.voice_client.is_connected():
-						wait = False
+				if self.voice_client is not None and self.voice_client.is_connected():
+					wait = False
 				await asyncio.sleep(1.0)
 
 			if getLoopMode(self.voice_channel.guild.id) == "on" and self.previous_song is not None:
@@ -178,9 +177,11 @@ class VoiceState:
 			download = False
 
 			if self.current_song.id is None:
-				log.info("music - streaming audio")
+				log.info("music - streaming audio because no id was provided")
 				self.voice_client.play(discord.PCMVolumeTransformer(
-					discord.FFmpegPCMAudio(self.current_song.url, options='-loglevel warning'), volume=0.3),
+					discord.FFmpegPCMAudio(self.current_song.url,
+										   before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max",
+										   options='-loglevel warning'), volume=0.5),
 					after=self.play_next)
 			elif not "music" in os.listdir('{}/../sounds'.format(os.path.dirname(__file__))) or not any(
 					f.startswith("{}_".format(self.current_song.id)) for f in
@@ -205,15 +206,15 @@ class VoiceState:
 
 					proc = subprocess.Popen(args, stdout=subprocess.PIPE)
 
-					self.voice_client.play(discord.PCMVolumeTransformer(discord.PCMAudio(proc.stdout), volume=0.3),
+					self.voice_client.play(discord.PCMVolumeTransformer(discord.PCMAudio(proc.stdout), volume=0.5),
 										   after=self.play_next)
 					dataBase.writeVal("music/play_times", self.current_song.id, time.time())
 				else:
-					log.info("music - streaming audio")
+					log.info("music - streaming audio because of config")
 					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url,
 																							   before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
 																							   options='-loglevel warning'),
-																		volume=0.3), after=self.play_next)
+																		volume=0.5), after=self.play_next)
 			else:
 				log.info("music - playing stored audio")
 				for f in os.listdir('{}/../sounds/music'.format(os.path.dirname(__file__))):
