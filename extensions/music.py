@@ -26,7 +26,7 @@ if not discord.opus.is_loaded():
 	try:
 		discord.opus.load_opus('opus')
 	except Exception as e:
-		log.error("music - Failed to load opus lib")
+		log.fatal("music - Failed to load opus lib")
 		raise e
 
 _config = {}
@@ -392,22 +392,17 @@ class Music(commands.Cog):
 
 			is_twitch = 'twitch' in url
 			if is_twitch:
-				song_name = info['description']
+				song_name = info.get('description', None)
 			else:
-				song_name = info['title']
+				song_name = info.get('title', None)
 
-			if 'thumbnail' in info:
-				thumbnail_url = info['thumbnail']
-			else:
-				thumbnail_url = None
+			thumbnail_url = info.get('thumbnail', None)
+			uploader = info.get('uploader', None)
+			is_live = info.get('is_live', None)
+			duration = info.get('duration', 0)
 
-			if 'uploader' in info:
-				uploader = info['uploader']
-			else:
-				uploader = 'Unknown'
-
-			if 'id' in info and not ("is_live" in info and info["is_live"] is True) and info["duration"] < 600:
-				video_id = info['id']
+			if is_live is not True and duration < 600:
+				video_id = info.get('id', None)
 			else:
 				video_id = None
 
@@ -458,10 +453,7 @@ class Music(commands.Cog):
 		locale = config.getLocale(ctx.guild.id)
 
 		if (info['_type'] == 'playlist') and ('title' in info):
-			if "uploader" in info:
-				playlist_uploader = info["uploader"]
-			else:
-				playlist_uploader = "Unknown"
+			playlist_uploader = info.get("uploader", "Unknown")
 
 			embed = discord.Embed(title=config.strings[locale]['music']['playytlist_enqueue'].format(info['title']),
 								  description='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
@@ -478,22 +470,17 @@ class Music(commands.Cog):
 
 					is_twitch = 'twitch' in url
 					if is_twitch:
-						song_name = entry['description']
+						song_name = entry.get('description', None)
 					else:
-						song_name = entry['title']
+						song_name = entry.get('title', None)
 
-					if 'thumbnail' in entry:
-						thumbnail_url = entry['thumbnail']
-					else:
-						thumbnail_url = None
+					thumbnail_url = entry.get('thumbnail', None)
+					uploader = entry.get('uploader', None)
+					is_live = entry.get('is_live', None)
+					duration = entry.get('duration', 0)
 
-					if 'uploader' in entry:
-						uploader = entry['uploader']
-					else:
-						uploader = None
-
-					if 'id' in info and not ("is_live" in info and info["is_live"] is True) and info["duration"] < 600:
-						video_id = info['id']
+					if is_live is not True and duration < 600:
+						video_id = entry.get('id', None)
 					else:
 						video_id = None
 
@@ -509,8 +496,8 @@ class Music(commands.Cog):
 					else:
 						voice_state.songs.append(song_entry)
 
-				except:
-					log.debug('playytlist: skipping unavailable song')
+				except Exception as error:
+					log.debug('playytlist: skipping unavailable song: {}'.format(str(error)))
 					continue
 		else:
 			await ctx.send(config.strings[locale]['music']['playytlist_no_playlist'])
@@ -681,33 +668,32 @@ class Music(commands.Cog):
 
 			await ctx.send(embed=embed)
 
+	@commands.command(no_pm=True)
+	async def queue(self, ctx):
+		voice_state = self.get_voice_state(ctx.message.guild)
+		songs = asyncio.Queue()
 
-@commands.command(no_pm=True)
-async def queue(self, ctx):
-	voice_state = self.get_voice_state(ctx.message.guild)
-	songs = asyncio.Queue()
+		for t in voice_state.songs:
+			await songs.put(t)
 
-	for t in voice_state.songs:
-		await songs.put(t)
+		locale = config.getLocale(ctx.guild.id)
 
-	locale = config.getLocale(ctx.guild.id)
+		if songs.empty():
+			embed = discord.Embed(title=config.strings[locale]['music']['queue_title'],
+								  description=config.strings[locale]['music']['queue_empty'])
+		else:
+			embed = discord.Embed(title=config.strings[locale]['music']['queue_title'])
+			for i in range(1, 11):
+				song = await songs.get()
+				embed.add_field(name='{}: {}'.format(i, song.name),
+								value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
+													 song.uploader), inline=False)
+				if songs.empty():
+					break
+			if songs.qsize() > 0:
+				embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(songs.qsize()))
 
-	if songs.empty():
-		embed = discord.Embed(title=config.strings[locale]['music']['queue_title'],
-							  description=config.strings[locale]['music']['queue_empty'])
-	else:
-		embed = discord.Embed(title=config.strings[locale]['music']['queue_title'])
-		for i in range(1, 11):
-			song = await songs.get()
-			embed.add_field(name='{}: {}'.format(i, song.name),
-							value='{} {}'.format(config.strings[locale]['music']['nowplaying_uploader'],
-												 song.uploader), inline=False)
-			if songs.empty():
-				break
-		if songs.qsize() > 0:
-			embed.set_footer(text=config.strings[locale]['music']['queue_elements_not_shown'].format(songs.qsize()))
-
-	await ctx.send(embed=embed)
+		await ctx.send(embed=embed)
 
 
 def setup(bot):
