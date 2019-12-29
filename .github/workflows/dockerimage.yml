@@ -28,7 +28,7 @@ jobs:
       - name: Create image tag
         id: image_tag
         run: |
-          export TAG=${{ steps.version.outputs.new_tag }}
+          export TAG=${{ steps.version_bump.outputs.new_tag }}
           if test -z "$TAG"
           then
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
