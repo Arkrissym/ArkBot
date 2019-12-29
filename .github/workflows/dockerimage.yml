@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: 
+    branches:
       - master
   schedule:
     - cron: 0 2 * * 5
@@ -10,24 +10,39 @@ on:
 jobs:
 
   build:
- 
+
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: docker.pkg.github.com/arkrissym/arkbot/arkbot
-      
+
     steps:
-    - uses: actions/checkout@v1
-    - name: Save build date
-      run: |
-        date > build_date.txt
-        cat build_date.txt
-    - name: Build docker image
-      run: |
-        export IMAGE_TAG=$(date +%s)
-        echo "building image $IMAGE_NAME:$IMAGE_TAG"
-        docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
-        docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
-        docker images
-        echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
-        docker push $IMAGE_NAME:$IMAGE_TAG
-        docker push $IMAGE_NAME:latest
+      - uses: actions/checkout@v1
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@master
+        if: github.event_name == 'push'
+        id: version_bump
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+          DEFAULT_BUMP: patch
+      - name: Create image tag
+        id: image_tag
+        run: |
+          export TAG=${{ steps.version.outputs.new_tag }}
+          if test -z "$TAG"
+          then
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          export TAG="$(git describe --tags).$(date +%s)"
+          fi
+          echo "::set-env name=tag::$TAG"
+      - name: Build docker image
+        run: |
+          export IMAGE_TAG=${{ steps.image_tag.outputs.tag }}
+          echo "$IMAGE_TAG" > version.txt
+          echo "building image $IMAGE_NAME:$IMAGE_TAG"
+          docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+          docker images
+          echo "${{ secrets.token }}" | docker login -u "${{ secrets.username }}" --password-stdin docker.pkg.github.com
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          docker push $IMAGE_NAME:latest

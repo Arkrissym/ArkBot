@@ -37,9 +37,9 @@ class ArkBot(commands.AutoShardedBot):
 
 	async def on_ready(self):
 		try:
-			with open("build_date.txt") as build_date:
-				logger.info("Docker image built at: {}".format(build_date.readline()))
-				build_date.close()
+			with open("version.txt") as version:
+				logger.info("Image version: {}".format(version.readline()))
+				version.close()
 		except:
 			pass
 
