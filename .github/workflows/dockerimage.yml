@@ -25,19 +25,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
           DEFAULT_BUMP: patch
-      - name: Create image tag
-        id: image_tag
-        run: |
-          export TAG=${{ steps.version_bump.outputs.new_tag }}
-          if test -z "$TAG"
-          then
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          export TAG="$(git describe --tags).$(date +%s)"
-          fi
-          echo "::set-env name=tag::$TAG"
       - name: Build docker image
         run: |
-          export IMAGE_TAG=${{ steps.image_tag.outputs.tag }}
+          export IMAGE_TAG=${{ steps.version_bump.outputs.new_tag }}
+          if test -z "$IMAGE_TAG"
+          then
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          export IMAGE_TAG="$(git describe --tags)"
+          fi
           echo "$IMAGE_TAG" > version.txt
           echo "building image $IMAGE_NAME:$IMAGE_TAG"
           docker build . --file Dockerfile --tag $IMAGE_NAME:$IMAGE_TAG
