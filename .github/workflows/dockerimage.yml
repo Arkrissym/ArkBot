@@ -31,7 +31,7 @@ jobs:
           if test -z "$IMAGE_TAG"
           then
           git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-          export IMAGE_TAG="$(git describe --tags)"
+          export IMAGE_TAG="$(git describe --tags).$(date +%s)"
           fi
           echo "$IMAGE_TAG" > version.txt
           echo "building image $IMAGE_NAME:$IMAGE_TAG"
