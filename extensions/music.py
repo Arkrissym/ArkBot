@@ -220,7 +220,7 @@ class VoiceState:
 
 				self.voice_client.play(
 					discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(filename, options='-loglevel warning'),
-												 volume=0.3), after=self.play_next)
+												 volume=0.5), after=self.play_next)
 				dataBase.writeVal("music/play_times", self.current_song.id, time.time())
 
 			await self.play_next_song.wait()
