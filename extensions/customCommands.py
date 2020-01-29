@@ -18,15 +18,6 @@ from psycopg2 import sql
 from core import config
 from core.logger import logger as log
 
-if not discord.opus.is_loaded():
-	try:
-		discord.opus.load_opus('opus')
-	except:
-		try:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
-		except:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
-
 
 class CustomCommands(commands.Cog):
 	def __init__(self, bot):
@@ -228,7 +219,8 @@ class CustomCommands(commands.Cog):
 								'join_channel'])
 					else:
 						voice_client.play(
-							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'),
+							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source,
+																				options='-loglevel warning -af loudnorm=i=-23.0:lra=7.0:tp=-2.0:offset=0.0:measured_i=-9.11:measured_lra=3.5:measured_tp=-0.03:measured_thresh=-19.18:linear=true[norm0]'),
 														 volume=0.8))
 						while voice_client.is_playing():
 							await asyncio.sleep(0.2)
@@ -256,7 +248,8 @@ class CustomCommands(commands.Cog):
 								'join_channel'])
 					else:
 						voice_client.play(
-							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source, options='-loglevel warning'),
+							discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(source,
+																				options='-loglevel warning -af loudnorm=i=-23.0:lra=7.0:tp=-2.0:offset=0.0:measured_i=-9.11:measured_lra=3.5:measured_tp=-0.03:measured_thresh=-19.18:linear=true[norm0]'),
 														 volume=0.8))
 						while voice_client.is_playing():
 							await asyncio.sleep(0.1)

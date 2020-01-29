@@ -22,13 +22,6 @@ from psycopg2 import sql
 from core import config, dataBase
 from core.logger import logger as log
 
-if not discord.opus.is_loaded():
-	try:
-		discord.opus.load_opus('opus')
-	except Exception as e:
-		log.fatal("music - Failed to load opus lib")
-		raise e
-
 _config = {}
 
 
@@ -181,7 +174,8 @@ class VoiceState:
 				self.voice_client.play(discord.PCMVolumeTransformer(
 					discord.FFmpegPCMAudio(self.current_song.url,
 										   before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-										   options='-loglevel warning'), volume=0.5),
+										   options='-loglevel warning -af loudnorm=i=-23.0:lra=7.0:tp=-2.0:offset=0.0:measured_i=-9.11:measured_lra=3.5:measured_tp=-0.03:measured_thresh=-19.18:linear=true[norm0]'),
+					volume=0.5),
 					after=self.play_next)
 			elif not "music" in os.listdir('{}/../sounds'.format(os.path.dirname(__file__))) or not any(
 					f.startswith("{}_".format(self.current_song.id)) for f in
@@ -199,7 +193,9 @@ class VoiceState:
 
 					args = ["ffmpeg"]
 					args.extend(("-reconnect", "1", "-reconnect_streamed", "1", "-reconnect_delay_max", "5", "-i",
-								 self.current_song.url, "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f",
+								 self.current_song.url, "-af",
+								 "loudnorm=i=-23.0:lra=7.0:tp=-2.0:offset=0.0:measured_i=-9.11:measured_lra=3.5:measured_tp=-0.03:measured_thresh=-19.18:linear=true[norm0]",
+								 "-f", "mp3", "-ar", "48000", "-ac", "2", filename, "-f",
 								 "s16le", "-ar", "48000", "-ac", "2", "pipe:1", "-loglevel", "warning"))
 
 					download = True
@@ -213,7 +209,7 @@ class VoiceState:
 					log.info("music - streaming audio because of config")
 					self.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.current_song.url,
 																							   before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-																							   options='-loglevel warning'),
+																							   options='-loglevel warning -af loudnorm=i=-23.0:lra=7.0:tp=-2.0:offset=0.0:measured_i=-9.11:measured_lra=3.5:measured_tp=-0.03:measured_thresh=-19.18:linear=true[norm0]'),
 																		volume=0.5), after=self.play_next)
 			else:
 				log.info("music - playing stored audio")
