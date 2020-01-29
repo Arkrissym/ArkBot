@@ -13,15 +13,6 @@ from discord.ext import commands
 
 from core import config
 
-if not discord.opus.is_loaded():
-	try:
-		discord.opus.load_opus('opus')
-	except:
-		try:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so')
-		except:
-			discord.opus.load_opus('.apt/usr/lib/x86_64-linux-gnu/libopus.so.0')
-
 
 class MagicShell(commands.Cog):
 	def __init__(self, bot):
