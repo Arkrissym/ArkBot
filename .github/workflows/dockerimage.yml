@@ -25,6 +25,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
           DEFAULT_BUMP: patch
+          RELEASE_BRANCHES: master
       - name: Build docker image
         run: |
           export IMAGE_TAG=${{ steps.version_bump.outputs.new_tag }}
