@@ -14,58 +14,58 @@ from core.logger import logger
 
 
 async def get_prefix(bot, message):
-	r = list()
-	if message.guild is not None:
-		r.extend([config.getPrefix(message.guild.id)])
-	else:
-		r.extend([config.config['bot']['cmd_prefix']])
-	r.extend(commands.when_mentioned(bot, message))
+    r = list()
+    if message.guild is not None:
+        r.extend([config.getPrefix(message.guild.id)])
+    else:
+        r.extend([config.config['bot']['cmd_prefix']])
+    r.extend(commands.when_mentioned(bot, message))
 
-	return r
+    return r
 
 
 class ArkBot(commands.AutoShardedBot):
-	def __init__(self, **options):
-		super().__init__(command_prefix=get_prefix, help_command=LocalizedHelpCommand(), **options)
+    def __init__(self, **options):
+        intents = discord.Intents.default()
+        intents.members = True
 
-		for ext in config.config['bot']['extensions'].split():
-			try:
-				logger.info("Loading extension {}".format(ext))
-				self.load_extension(ext)
-			except Exception as e:
-				logger.error('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
+        super().__init__(command_prefix=get_prefix, help_command=LocalizedHelpCommand(), intents=intents, **options)
 
-	async def on_ready(self):
-		try:
-			with open("version.txt") as version:
-				logger.info("Image version: {}".format(version.readline()))
-				version.close()
-		except:
-			pass
+        for ext in config.config['bot']['extensions'].split():
+            try:
+                logger.info("Loading extension {}".format(ext))
+                self.load_extension(ext)
+            except Exception as e:
+                logger.error('Failed to load extension {}\n{}: {}'.format(ext, type(e).__name__, e))
 
-		logger.info('Logged in as ' + self.user.name)
-		logger.info('discord.py version: ' + discord.__version__)
-		await self.change_presence(status=discord.Status.online,
-								   activity=discord.Game(name='github.com/Arkrissym/ArkBot'),
-								   afk=False)
+    async def on_ready(self):
+        try:
+            with open("version.txt") as version:
+                logger.info("Image version: {}".format(version.readline()))
+                version.close()
+        except:
+            pass
 
-		# fetch config from database
-		for g in self.guilds:
-			config.getLocale(g.id)
+        logger.info('Logged in as ' + self.user.name)
+        logger.info('discord.py version: ' + discord.__version__)
+
+        # fetch config from database
+        for g in self.guilds:
+            config.getLocale(g.id)
 
 
 # read the token from token.txt
 try:
-	tokenFile = open("token.txt", "r")
-	token = tokenFile.readline()
-	tokenFile.close()
-	# remove \n at the end of the line
-	token = token[:-1]
+    tokenFile = open("token.txt", "r")
+    token = tokenFile.readline()
+    tokenFile.close()
+    # remove \n at the end of the line
+    token = token[:-1]
 except:
-	token = os.getenv("DISCORD_TOKEN")
+    token = os.getenv("DISCORD_TOKEN")
 
 if token is None:
-	logger.fatal(
-		"No token for discord found. Please save a token.txt or specify a environment variable 'DISCORD_TOKEN'.")
+    logger.fatal(
+        "No token for discord found. Please save a token.txt or specify a environment variable 'DISCORD_TOKEN'.")
 else:
-	ArkBot().run(token)
+    ArkBot().run(token)
